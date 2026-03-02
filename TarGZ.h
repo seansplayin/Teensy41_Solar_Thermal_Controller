@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <AsyncWebServer_Teensy41.h>
 #include "Config.h"
 
 #include "arduino_freertos.h"

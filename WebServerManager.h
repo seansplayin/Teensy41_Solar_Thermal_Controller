@@ -1,8 +1,6 @@
 #ifndef WEBSERVERMANAGER_H
 #define WEBSERVERMANAGER_H
 #include <RTClib.h>
-#include <AsyncWebServer_Teensy41.h>
-#include <Teensy41_AsyncTCP.h>
 #include "Config.h"
 #include "TemperatureControl.h"
 #include "arduino_freertos.h"
