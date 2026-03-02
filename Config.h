@@ -1,10 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <Arduino.h> 
-#include <RTClib.h>
-#include <stdint.h>
-#include <LittleFS.h> 
+#include <Arduino.h>
+#include <LittleFS.h>
 #include "DiagConfig.h"
 
 // FreeRTOS Types

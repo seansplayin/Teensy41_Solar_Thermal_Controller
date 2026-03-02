@@ -1,12 +1,11 @@
 #ifndef WEBSERVERMANAGER_H
 #define WEBSERVERMANAGER_H
 #include <RTClib.h>
-#include <ESPAsyncWebServer.h>
-//#include <AsyncWebServer_ESP32_W5500.h>
-#include <AsyncTCP.h>
+#include <AsyncWebServer_Teensy41.h>
+#include <Teensy41_AsyncTCP.h>
 #include "Config.h"
-#include "TemperatureControl.h" // Include TemperatureControl header
-#include <freertos/semphr.h>
+#include "TemperatureControl.h"
+#include "arduino_freertos.h"
 
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;

@@ -6,9 +6,10 @@
 #include <Wire.h>
 #include <TimeLib.h>
 #include <RTClib.h>
-#include "arduino_freertos.h" // FreeRTOS headers
+#include "arduino_freertos.h" 
 #include "DiagLog.h"
 #include "AlarmManager.h"
+#include "timers.h"
 
 extern DateTime CurrentTime;
 bool needToSyncTime = true;
@@ -37,6 +38,11 @@ void tryNtpUpdate() {
     // xTimerStart(hNtpRetryTimer, 0);
 }
 
+// Teensy 4.1 real-time clock provider for TimeLib
+time_t getTeensy3Time() {
+  return Teensy3Clock.get();
+}
+
 void initNTP() {
     LOG_CAT(DBG_TIMESYNC, "[TimeSync] NTP Init\n");
     // Create One-Shot Timer for retries (10 minutes)
@@ -62,6 +68,3 @@ void initializeTime() {
     initNTP();
 }
 
-time_t getTeensy3Time() {
-  return Teensy3Clock.get();
-}

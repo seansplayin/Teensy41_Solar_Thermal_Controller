@@ -9,6 +9,8 @@
 #include "FileSystemManager.h"
 #include "MemoryStats.h"
 #include "DiagLog.h"
+#include <RTClib.h>
+#include "RTCManager.h"   // for extern DateTime CurrentTime
 
 extern DateTime CurrentTime;   
 

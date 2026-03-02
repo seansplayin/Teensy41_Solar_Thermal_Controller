@@ -27,16 +27,16 @@
 
 using namespace qindesign::network;
 
-// --- GLOBAL RTOS HANDLES ---\
+// --- GLOBAL RTOS HANDLES ---
 SemaphoreHandle_t pumpStateMutex;
 SemaphoreHandle_t temperatureMutex;
 // fileSystemMutex declared in FileSystemManager
 
-// --- WEB SERVER ---\
+// --- WEB SERVER ---
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws"); 
 
-// --- NETWORK SETUP ---\
+// --- NETWORK SETUP ---
 void setupNetwork() {
   Serial.println("[Network] Initializing QNEthernet...");
   Ethernet.begin(); // DHCP
@@ -61,7 +61,7 @@ void setupNetwork() {
   server.begin();
 }
 
-// --- MAIN CONTROLLER TASK ---\
+// --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {
   
   // 1. Initialize Mutexes
@@ -93,7 +93,7 @@ static void TaskControllerMain(void* pvParameters) {
   }
 }
 
-// --- BOOTLOADER ---\
+// --- BOOTLOADER ---
 void setup() {
   Serial.begin(115200);
   while (!Serial && millis() < 4000); 
