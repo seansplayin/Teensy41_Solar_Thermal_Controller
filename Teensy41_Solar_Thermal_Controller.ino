@@ -20,6 +20,10 @@
 #include "TemperatureLogging.h"
 #include "DiagLog.h"
 #include "AlarmHistory.h" 
+#include "SerialPrint.h"
+#include "uptime_formatter.h"
+#include "AlarmWebpage.h"
+#include "NetworkManager.h"
 
 using namespace qindesign::network;
 
