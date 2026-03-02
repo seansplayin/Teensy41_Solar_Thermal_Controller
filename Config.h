@@ -10,6 +10,25 @@
 #include "arduino_freertos.h"
 #include <semphr.h>
 
+// --- Globals ---
+
+// Create a new file: Globals.h  (or add to an existing header)
+#pragma once
+#include <mutex>
+
+extern std::mutex temperatureMutex;
+extern std::mutex pumpStateMutex;
+extern std::mutex g_tempWsPayloadMutex;   // you use this in TemperatureControl.cpp
+extern String g_tempWsPayload;
+extern bool g_sendTemperatures;
+
+extern const uint8_t pumpPins[];   // or whatever type it is
+extern void setupAlarmRoutes();
+extern void AlarmManager_begin();
+extern void AlarmHistory_begin();
+extern void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...);
+
+
 // --- DIAGNOSTICS ---
 #ifndef ENABLE_SERIAL_DIAGNOSTICS
   #define ENABLE_SERIAL_DIAGNOSTICS 1
