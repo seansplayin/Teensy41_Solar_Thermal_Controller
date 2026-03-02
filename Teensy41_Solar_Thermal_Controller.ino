@@ -21,10 +21,10 @@
 #include "TemperatureLogging.h"
 #include "DiagLog.h"
 #include "AlarmHistory.h" 
-#include "SerialPrint.h"
 #include "uptime_formatter.h"
 #include "AlarmWebpage.h"
 #include "NetworkManager.h"
+#include "WebServerManager.h"
 
 using namespace qindesign::network;
 
@@ -33,9 +33,7 @@ SemaphoreHandle_t pumpStateMutex;
 SemaphoreHandle_t temperatureMutex;
 // fileSystemMutex declared in FileSystemManager
 
-// --- WEB SERVER ---
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws"); 
+
 
 // --- NETWORK SETUP ---
 void setupNetwork() {

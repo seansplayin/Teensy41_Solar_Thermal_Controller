@@ -14,7 +14,6 @@ void TaskFirstPage(void *pvParameters);
 void TaskSecondPage(void *pvParameters);
 void TaskLogDataRoute(void *pvParameters);
 void TaskUpdateTemperatures(void *pvParameters);
-void TaskSerialPrint(void *pvParameters);
 void TaskFileSystemCleanup(void *pvParameters);
 void startAllTasks();
 
