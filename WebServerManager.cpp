@@ -391,6 +391,7 @@ void startServer() {
     initWebSocket();          // Initialize WebSocket
     setupRoutes();            // Setup additional routes
     ensurePumpRuntimeJsonMutex();
+    setupAlarmRoutes(server);
     AlarmManager_setStateChangedCallback(onAlarmStateChanged);
     server.begin();           // Start the server
 }

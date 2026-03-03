@@ -10,23 +10,7 @@
 #include "arduino_freertos.h"
 #include <semphr.h>
 
-// --- Globals ---
 
-// Create a new file: Globals.h  (or add to an existing header)
-#pragma once
-#include <mutex>
-
-extern std::mutex temperatureMutex;
-extern std::mutex pumpStateMutex;
-extern std::mutex g_tempWsPayloadMutex;   // you use this in TemperatureControl.cpp
-extern String g_tempWsPayload;
-extern bool g_sendTemperatures;
-
-extern const uint8_t pumpPins[];   // or whatever type it is
-extern void setupAlarmRoutes();
-extern void AlarmManager_begin();
-extern void AlarmHistory_begin();
-extern void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...);
 
 
 // --- DIAGNOSTICS ---
@@ -125,5 +109,28 @@ struct TimeConfig {
 };
 extern SystemConfig g_config;
 extern TimeConfig g_timeConfig;
+
+
+// ====================== GLOBALS ======================
+extern SemaphoreHandle_t pumpStateMutex;
+extern SemaphoreHandle_t temperatureMutex;
+extern SemaphoreHandle_t fileSystemMutex;  // from FileSystemManager
+
+extern AsyncWebServer server;  // For other files that need it (rare)
+
+extern String g_tempWsPayload;
+extern bool g_sendTemperatures;
+extern std::mutex g_tempWsPayloadMutex;  // If using std::mutex
+
+// Pump stuff
+extern const int pumpPins[10];
+extern int pumpModes[10];
+extern int pumpStates[10];
+
+// AlarmManager stubs (we'll fill these next)
+void AlarmManager_begin();
+void AlarmHistory_begin();
+void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...);
+
 
 #endif

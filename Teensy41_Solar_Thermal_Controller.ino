@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <LittleFS.h>
-#include <QNEthernet.h>
+
 #include "arduino_freertos.h"
-#include <AsyncWebServer_Teensy41.h>
+
 
 // --- Application Includes ---
 #include "Config.h"
@@ -28,37 +28,17 @@
 
 using namespace qindesign::network;
 
-// --- GLOBAL RTOS HANDLES ---
-SemaphoreHandle_t pumpStateMutex;
-SemaphoreHandle_t temperatureMutex;
-// fileSystemMutex declared in FileSystemManager
+
+// Define them here (or in a new Globals.cpp later)
+SemaphoreHandle_t pumpStateMutex = nullptr;
+SemaphoreHandle_t temperatureMutex = nullptr;
+SemaphoreHandle_t fileSystemMutex = nullptr;
+
+String g_tempWsPayload = "";
+bool g_sendTemperatures = false;
+// std::mutex g_tempWsPayloadMutex;  // Uncomment if using std::mutex
 
 
-
-// --- NETWORK SETUP ---
-void setupNetwork() {
-  Serial.println("[Network] Initializing QNEthernet...");
-  Ethernet.begin(); // DHCP
-
-  unsigned long start = millis();
-  while (!Ethernet.localIP()) {
-    if (millis() - start > 10000) {
-      Serial.println("[Network] DHCP Failed!");
-      break;
-    }
-    delay(100);
-  }
-  
-  if (Ethernet.linkStatus() == LinkON) {
-      Serial.print("[Network] Connected! IP: ");
-      Serial.println(Ethernet.localIP());
-  } else {
-      Serial.println("[Network] Cable disconnected.");
-  }
-  
-  // Start Web Server
-  server.begin();
-}
 
 // --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {
@@ -84,12 +64,7 @@ static void TaskControllerMain(void* pvParameters) {
   Serial.println("[System] Starting Application Tasks...");
   startAllTasks(); 
 
-  // 5. Infinite Loop
-  while (1) {
-    vTaskDelay(pdMS_TO_TICKS(10000)); 
-    Serial.print("[System] Heap: ");
-    Serial.println(xPortGetFreeHeapSize());
-  }
+  WebServerManager_begin();
 }
 
 // --- BOOTLOADER ---

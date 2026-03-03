@@ -9,7 +9,7 @@
 
 extern AsyncWebServer server;
 
-void setupAlarmRoutes() {
+void setupAlarmRoutes(AsyncWebServer& server) {
   // Serve the HTML Page manually
   server.on("/alarm-log", HTTP_GET, [](AsyncWebServerRequest *request){
       if (FlashFS.exists("/alarm_log.html")) {

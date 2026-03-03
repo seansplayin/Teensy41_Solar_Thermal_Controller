@@ -216,3 +216,24 @@ size_t AlarmManager_getActiveStates(AlarmCode* codesOut, AlarmState* statesOut, 
   }
   return n;
 }
+
+
+void AlarmManager_begin() {
+    // TODO: Your full init from ESP
+    Serial.println("[Alarm] Manager started.");
+}
+
+void AlarmHistory_begin() {
+    // TODO: Your full init
+    Serial.println("[Alarm] History started.");
+}
+
+void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...) {
+    // Stub for now
+    char buf[256];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    Serial.printf("[ALARM] %s: %s\n", code == ALARM_CRITICAL ? "CRIT" : "WARN", buf);
+}
