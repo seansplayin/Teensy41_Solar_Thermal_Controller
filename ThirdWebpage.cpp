@@ -7,14 +7,10 @@
 #include "Config.h"
 #include "WebServerManager.h"
 #include "FileSystemManager.h"
-#include <esp_heap_caps.h>  // For MALLOC_CAP_SPIRAM
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
+#include "arduino_freertos.h"
 #include "TaskManager.h"
 #define DEST_FS_USES_LITTLEFS
 #include "TarGZ.h"
-#include <esp_task_wdt.h>
 #include "DiagLog.h"
 
 

@@ -1,3 +1,5 @@
+#ifndef TARGZ_H
+#define TARGZ_H
 #pragma once
 
 #include <Arduino.h>
@@ -46,4 +48,7 @@ namespace TarGZ {
   // Registers /fs/download_compressed route.
   void registerRoutes(AsyncWebServer &server);
 }
+
+#endif
+
 

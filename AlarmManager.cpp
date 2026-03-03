@@ -2,7 +2,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-#include "freertos/semphr.h"
 #include "DiagLog.h"
 
 

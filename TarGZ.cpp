@@ -5,10 +5,10 @@
 #include <LittleFS.h>
 #define DEST_FS_USES_LITTLEFS
 #include <ESP32-targz.h>
-#include "esp_heap_caps.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
+
+#include "arduino_freeRTOS.h"
+#include "arduino_freertos.h"
+
 #include "DiagLog.h"
 
 

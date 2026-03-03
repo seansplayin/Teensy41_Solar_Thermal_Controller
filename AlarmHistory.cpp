@@ -2,9 +2,8 @@
 #include "FileSystemManager.h"
 #include <LittleFS.h>
 #include <ArduinoJson.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
+#include "arduino_freertos.h"
+
 #include "DiagLog.h"
 
 

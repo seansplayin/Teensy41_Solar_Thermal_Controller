@@ -12,10 +12,8 @@
 #include <RTClib.h>
 #include "uptime_formatter.h"
 #include "TemperatureControl.h" 
-#include "esp_task_wdt.h" 
 #include "FileSystemManager.h"
 #include "MemoryStats.h"
-#include <esp_heap_caps.h> 
 #include "TimeSync.h"   
 #include "AlarmManager.h"
 #include "AlarmWebpage.h"
