@@ -1,6 +1,10 @@
 #include "NetworkManager.h"
 #include "WebServerManager.h"
 #include <QNEthernet.h>
+#include "AlarmWebpage.h"
+
+
+
 using namespace qindesign::network;   // ← THIS FIXES Ethernet & LinkON
 
 bool isNetworkConnected() {

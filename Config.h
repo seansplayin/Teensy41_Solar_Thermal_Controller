@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -6,14 +5,11 @@
 #include <LittleFS.h>
 #include "DiagConfig.h"
 
-// FreeRTOS Types
+// FreeRTOS
 #include <arduino_freertos.h>
 #include <semphr.h>
 
-
-
-
-// --- DIAGNOSTICS ---
+// ====================== DIAGNOSTICS ======================
 #ifndef ENABLE_SERIAL_DIAGNOSTICS
   #define ENABLE_SERIAL_DIAGNOSTICS 1
 #endif
@@ -24,30 +20,29 @@
   #define DIAG_SERIAL_DEFAULT_MASK DBG_DEFAULT_DEV_MASK
 #endif
 
-// --- FILESYSTEM PATHS ---
-#define DIAG_SERIAL_CONFIG_DIR  "/Json_Config_Files"
-#define DIAG_SERIAL_CONFIG_PATH "/Json_Config_Files/diag_serial_config.json"
-#define SYSTEM_CONFIG_PATH      "/Json_Config_Files/system_config.json"
-#define TIME_CONFIG_PATH        "/Json_Config_Files/time_config.json"
+// ====================== FILESYSTEM PATHS ======================
+#define DIAG_SERIAL_CONFIG_DIR   "/Json_Config_Files"
+#define DIAG_SERIAL_CONFIG_PATH  "/Json_Config_Files/diag_serial_config.json"
+#define SYSTEM_CONFIG_PATH       "/Json_Config_Files/system_config.json"
+#define TIME_CONFIG_PATH         "/Json_Config_Files/time_config.json"
 
-// --- HANDLES ---
+// ====================== HANDLES ======================
 extern SemaphoreHandle_t pumpStateMutex;
 extern SemaphoreHandle_t temperatureMutex;
 extern SemaphoreHandle_t fileSystemMutex;
 
-// --- TEENSY 4.1 PIN MAP ---
+// ====================== TEENSY 4.1 PIN MAP ======================
 const int pinSDA = 18;
 const int pinSCL = 19;
-const int FURNACE_HEATING_PIN = 22; 
-const int DHW_HEATING_PIN     = 23; 
-const int ONE_WIRE_BUS_1 = 2; 
-const int ONE_WIRE_BUS_2 = 3; 
+const int FURNACE_HEATING_PIN = 22;
+const int DHW_HEATING_PIN     = 23;
+const int ONE_WIRE_BUS_1      = 2;
+const int ONE_WIRE_BUS_2      = 3;
 
-// Hardware SPI Pins
-#define MAX31865_CS_PIN    10
-#define MAX31865_DO_PIN    12
-#define MAX31865_DI_PIN    11
-#define MAX31865_CLK_PIN   13
+#define MAX31865_CS_PIN   10
+#define MAX31865_DO_PIN   12
+#define MAX31865_DI_PIN   11
+#define MAX31865_CLK_PIN  13
 
 const int PANEL_LEAD_PUMP_RELAY = 4;
 const int PANEL_LAG_PUMP_RELAY  = 5;
@@ -55,31 +50,33 @@ const int HEAT_TAPE_RELAY       = 6;
 const int CIRC_PUMP_RELAY       = 7;
 const int DHW_PUMP_RELAY        = 8;
 const int STORAGE_HEAT_RELAY    = 9;
-const int BOILER_CIRC_RELAY     = 24; 
-const int RECIRC_VALVE_RELAY    = 25; 
+const int BOILER_CIRC_RELAY     = 24;
+const int RECIRC_VALVE_RELAY    = 25;
 const int Pump_9_Unused_Relay   = 28;
 const int Pump_10_Unused_Relay  = 29;
 
-#define PUMP_OFF 0
-#define PUMP_ON 1
+#define PUMP_OFF  0
+#define PUMP_ON   1
 #define PUMP_AUTO 2
+
+// ====================== PUMP ARRAYS ======================
 extern int pumpModes[10];
 extern int pumpStates[10];
 const int numPumps = 10;
 extern const int pumpPins[10];
 
-// --- PARAMETERS ---
-inline constexpr float DEFAULT_PanelOnDifferential     = 30.0f;
-inline constexpr float DEFAULT_PanelLowDifferential    = 15.0f;
-inline constexpr float DEFAULT_PanelOffDifferential    = 3.0f;
-inline constexpr float DEFAULT_panelTminimum           = 125.0f;
-inline constexpr float DEFAULT_StorageHeatingLimit     = 130.0f;
-inline constexpr float DEFAULT_Circ_Pump_On            = 5.0f;
-inline constexpr float DEFAULT_Circ_Pump_Off           = 5.0f;
-inline constexpr float DEFAULT_Heat_Tape_On            = 35.0f;
-inline constexpr float DEFAULT_Heat_Tape_Off           = 45.0f;
-inline constexpr float DEFAULT_Boiler_Circ_On          = 106.0f;
-inline constexpr float DEFAULT_Boiler_Circ_Off         = 110.0f;
+// ====================== PARAMETERS ======================
+inline constexpr float DEFAULT_PanelOnDifferential  = 30.0f;
+inline constexpr float DEFAULT_PanelLowDifferential = 15.0f;
+inline constexpr float DEFAULT_PanelOffDifferential = 3.0f;
+inline constexpr float DEFAULT_panelTminimum        = 125.0f;
+inline constexpr float DEFAULT_StorageHeatingLimit  = 130.0f;
+inline constexpr float DEFAULT_Circ_Pump_On         = 5.0f;
+inline constexpr float DEFAULT_Circ_Pump_Off        = 5.0f;
+inline constexpr float DEFAULT_Heat_Tape_On         = 35.0f;
+inline constexpr float DEFAULT_Heat_Tape_Off        = 45.0f;
+inline constexpr float DEFAULT_Boiler_Circ_On       = 106.0f;
+inline constexpr float DEFAULT_Boiler_Circ_Off      = 110.0f;
 
 #define NUM_TEMP_SENSORS 14
 
@@ -88,6 +85,7 @@ extern const char* SENSOR_FILE_NAMES[15];
 
 float getTempByIndex(int idx);
 
+// ====================== CONFIG STRUCTS ======================
 struct SystemConfig {
     bool     diagSerialEnable;
     uint32_t diagSerialMask;
@@ -103,31 +101,22 @@ struct SystemConfig {
     float heatTapeOn;
     float heatTapeOff;
 };
+
 struct TimeConfig {
     String timeZoneId;
     bool   dstEnabled;
 };
+
 extern SystemConfig g_config;
-extern TimeConfig g_timeConfig;
+extern TimeConfig   g_timeConfig;
 
-
-// ====================== GLOBALS ======================
-extern SemaphoreHandle_t pumpStateMutex;
-extern SemaphoreHandle_t temperatureMutex;
-extern SemaphoreHandle_t fileSystemMutex;
-
+// ====================== GLOBALS & ALARM FUNCTIONS ======================
 extern String g_tempWsPayload;
 extern volatile bool g_sendTemperatures;
 
-// Pump pins (match ESP version exactly — int[10] is fine)
-extern const int pumpPins[10];
-extern int pumpModes[10];
-extern int pumpStates[10];
-const int numPumps = 10;
-
-// AlarmManager functions (declared in AlarmManager.h)
+// AlarmManager functions (forward declarations)
 void AlarmManager_begin();
 void AlarmHistory_begin();
-
+void setupAlarmRoutes();
 
 #endif
