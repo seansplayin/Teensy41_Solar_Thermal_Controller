@@ -1,5 +1,7 @@
 // WebServerManager1.cpp
 #include "WebServerManager.h"
+#include "NetworkManager.h"
+#include "AlarmWebpage.h"
 #include "Logging.h"
 #include "Config.h"
 #include "PumpManager.h"
@@ -15,8 +17,6 @@
 #include "FileSystemManager.h"
 #include "MemoryStats.h"
 #include "TimeSync.h"   
-#include "AlarmManager.h"
-#include "AlarmWebpage.h"
 #include "TarGZ.h"
 #include "DiagLog.h"
 
@@ -1817,3 +1817,11 @@ void refreshRuntimeCache() {
     }
     g_pumpRuntimeBuiltVersion = version;
 }
+
+
+void WebServerManager_begin() {
+    setupNetwork();              // starts Ethernet + registers ALL routes
+    server.begin();
+    Serial.println("[Web] AsyncWebServer started on port 80");
+}
+

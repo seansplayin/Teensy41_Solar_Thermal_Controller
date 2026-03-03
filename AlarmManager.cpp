@@ -1,9 +1,11 @@
 #include "AlarmManager.h"
+#include <arduino_freertos.h>
+#include <semphr.h>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include "DiagLog.h"
-
+#include "WebServerManager.h"
 
 static SemaphoreHandle_t s_alarmMutex = nullptr;
 
@@ -103,14 +105,13 @@ void AlarmManager_set(AlarmCode code, AlarmSeverity sev, const char* fmt, ...) {
   if (c == 0 || c > ALM_CODE_MAX || !s_alarmMutex) return;
 
   char detail[140];
-    va_list ap; va_start(ap, fmt);
+  va_list ap; va_start(ap, fmt);
   vfmtToBuf(detail, sizeof(detail), fmt, ap);
   va_end(ap);
 
   bool changed = false;
 
-
-    if (xSemaphoreTake(s_alarmMutex, pdMS_TO_TICKS(100))) {
+  if (xSemaphoreTake(s_alarmMutex, pdMS_TO_TICKS(100))) {
     AlarmState &st = s_states[c];
     const bool wasActive = st.active;
 
@@ -124,8 +125,6 @@ void AlarmManager_set(AlarmCode code, AlarmSeverity sev, const char* fmt, ...) {
       changed = true;
       pushEvent(code, sev, ALM_ACT_SET, st.detail);
     }
-
-
 
     xSemaphoreGive(s_alarmMutex);
   }
@@ -141,13 +140,13 @@ void AlarmManager_clear(AlarmCode code, const char* fmt, ...) {
   if (c == 0 || c > ALM_CODE_MAX || !s_alarmMutex) return;
 
   char detail[140] = "";
-    if (fmt) {
+  if (fmt) {
     va_list ap; va_start(ap, fmt);
     vfmtToBuf(detail, sizeof(detail), fmt, ap);
     va_end(ap);
   }
 
-    bool changed = false;
+  bool changed = false;
 
   if (xSemaphoreTake(s_alarmMutex, pdMS_TO_TICKS(100))) {
     AlarmState &st = s_states[c];
@@ -165,8 +164,6 @@ void AlarmManager_clear(AlarmCode code, const char* fmt, ...) {
     s_stateCb(n);
   }
 }
-
-
 
 void AlarmManager_event(AlarmCode code, AlarmSeverity sev, const char* fmt, ...) {
   uint16_t c = (uint16_t)code;
@@ -214,25 +211,4 @@ size_t AlarmManager_getActiveStates(AlarmCode* codesOut, AlarmState* statesOut, 
     xSemaphoreGive(s_alarmMutex);
   }
   return n;
-}
-
-
-void AlarmManager_begin() {
-    // TODO: Your full init from ESP
-    Serial.println("[Alarm] Manager started.");
-}
-
-void AlarmHistory_begin() {
-    // TODO: Your full init
-    Serial.println("[Alarm] History started.");
-}
-
-void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...) {
-    // Stub for now
-    char buf[256];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    Serial.printf("[ALARM] %s: %s\n", code == ALARM_CRITICAL ? "CRIT" : "WARN", buf);
 }

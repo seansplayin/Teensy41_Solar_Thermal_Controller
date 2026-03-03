@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "Config.h"
 
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 
 // tgz producer stack depth (WORDS like the rest of your tasks)
 #ifndef TGZ_PRODUCER_TASK_STACK_WORDS

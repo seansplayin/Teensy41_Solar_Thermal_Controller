@@ -1,8 +1,12 @@
+#include "NetworkManager.h"
+#include "WebServerManager.h"
 #include <QNEthernet.h>
+using namespace qindesign::network;   // ← THIS FIXES Ethernet & LinkON
 
+bool isNetworkConnected() {
+  return Ethernet.linkStatus() == LinkON;
+}
 
-
-// --- NETWORK SETUP ---
 void setupNetwork() {
   Serial.println("[Network] Initializing QNEthernet...");
   Ethernet.begin(); // DHCP
@@ -22,7 +26,12 @@ void setupNetwork() {
   } else {
       Serial.println("[Network] Cable disconnected.");
   }
-  
-  // Start Web Server
+
+  // Register ALL web routes (exactly like your ESP version)
+  setupAlarmRoutes();     // from AlarmWebpage.cpp
+  // setupFirstPageRoutes();   // uncomment when you add FirstWebpage.cpp
+  // ... add more later
+
   server.begin();
+  Serial.println("[Network] AsyncWebServer started on port 80");
 }

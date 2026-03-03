@@ -4,7 +4,7 @@
 #include "Config.h"
 #include "DiagLog.h"
 #include "AlarmManager.h"
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 
 // Remove watchdog header
 // #include <esp_task_wdt.h>

@@ -7,7 +7,7 @@
 #include "DiagConfig.h"
 
 // FreeRTOS Types
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 #include <semphr.h>
 
 
@@ -114,23 +114,20 @@ extern TimeConfig g_timeConfig;
 // ====================== GLOBALS ======================
 extern SemaphoreHandle_t pumpStateMutex;
 extern SemaphoreHandle_t temperatureMutex;
-extern SemaphoreHandle_t fileSystemMutex;  // from FileSystemManager
-
-extern AsyncWebServer server;  // For other files that need it (rare)
+extern SemaphoreHandle_t fileSystemMutex;
 
 extern String g_tempWsPayload;
-extern bool g_sendTemperatures;
-extern std::mutex g_tempWsPayloadMutex;  // If using std::mutex
+extern volatile bool g_sendTemperatures;
 
-// Pump stuff
+// Pump pins (match ESP version exactly — int[10] is fine)
 extern const int pumpPins[10];
 extern int pumpModes[10];
 extern int pumpStates[10];
+const int numPumps = 10;
 
-// AlarmManager stubs (we'll fill these next)
+// AlarmManager functions (declared in AlarmManager.h)
 void AlarmManager_begin();
 void AlarmHistory_begin();
-void AlarmManager_set(AlarmCode code, AlarmSeverity severity, const char* fmt, ...);
 
 
 #endif

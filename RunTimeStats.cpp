@@ -1,7 +1,7 @@
 #include "Config.h"
 #include "DiagLog.h"
 #include <Arduino.h>
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 
 // The Teensy FreeRTOS library does not enable runtime stats by default.
 // We stub this out to prevent compilation errors.

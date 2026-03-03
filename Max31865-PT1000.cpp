@@ -2,7 +2,7 @@
 #include <Adafruit_MAX31865.h>
 #include "Max31865-PT1000.h"
 #include "Config.h"
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 #include "DiagLog.h"
 #include "AlarmManager.h"
 

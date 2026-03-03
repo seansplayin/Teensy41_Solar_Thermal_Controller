@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 
 
 // --- Application Includes ---
@@ -58,7 +58,7 @@ static void TaskControllerMain(void* pvParameters) {
   initializePumps();
   
   // 3. Start Network & Web
-  setupNetwork();
+  setupNetwork(); // now lives in NetworkManager.cpp
   
   // 4. Start Tasks
   Serial.println("[System] Starting Application Tasks...");
@@ -79,6 +79,8 @@ void setup() {
 
   // Start Scheduler
   vTaskStartScheduler();
+
+  WebServerManager_begin();
 }
 
 void loop() {

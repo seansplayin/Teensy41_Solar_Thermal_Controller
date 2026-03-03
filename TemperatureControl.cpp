@@ -6,7 +6,7 @@
 #include "Max31865-PT1000.h"
 #include "DS18B20.h"
 #include "DiagLog.h"
-#include "arduino_freertos.h"
+#include <arduino_freertos.h>
 
 // Mutex for temperature data access
 extern SemaphoreHandle_t temperatureMutex;
