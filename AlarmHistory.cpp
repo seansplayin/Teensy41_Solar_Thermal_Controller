@@ -205,7 +205,7 @@ static bool persistUnlocked() {
   // Rewrite file atomically:
   if (LittleFS.exists(TMP_PATH)) LittleFS.remove(TMP_PATH);
 
-  File f = LittleFS.open(TMP_PATH, "w");
+  File f = LittleFS.open(TMP_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
   // Write all records in group order (newest first per group)
@@ -245,7 +245,7 @@ static void loadFromFSUnlocked() {
     return;
   }
 
-  File f = LittleFS.open(LOG_PATH.c_str(), FILE_READ);
+  File f = LittleFS.open(LOG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return; }
 
   char line[256];

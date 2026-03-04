@@ -112,7 +112,7 @@ bool loadSystemConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(SYSTEM_CONFIG_PATH.c_str(), FILE_READ);
+  File f = LittleFS.open(SYSTEM_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -205,7 +205,7 @@ bool saveSystemConfigToFS() {
   JsonArray lfSensors = doc.createNestedArray("lineFreezeSensors");
   for (uint8_t* s = g_config.lineFreezeSensors; *s; s++) lfSensors.add(*s);
 
-    File f = LittleFS.open(SYSTEM_CONFIG_PATH, "w");
+  File f = LittleFS.open(SYSTEM_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
   serializeJson(doc, f);
   f.close();
@@ -239,7 +239,7 @@ bool loadTimeConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(TIME_CONFIG_PATH.c_str(), FILE_READ);
+  File f = LittleFS.open(TIME_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -265,7 +265,7 @@ bool saveTimeConfigToFS() {
   doc["timeZoneId"] = g_timeConfig.timeZoneId;
   doc["dstEnabled"] = g_timeConfig.dstEnabled;
 
-    File f = LittleFS.open(TIME_CONFIG_PATH, "w");
+    File f = LittleFS.open(TIME_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
   serializeJson(doc, f);
   f.close();
@@ -361,7 +361,7 @@ bool saveDiagSerialConfigToFS() {
   doc["diagSerialEnable"] = g_config.diagSerialEnable;
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, "w");
+  File f = LittleFS.open(TIME_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
   serializeJson(doc, f);

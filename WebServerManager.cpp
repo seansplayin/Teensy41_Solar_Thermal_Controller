@@ -22,7 +22,15 @@
 #include "DiagLog.h"
 
 
-
+String getContentType(const String& path) {
+  if (path.endsWith(".html")) return "text/html";
+  if (path.endsWith(".css"))  return "text/css";
+  if (path.endsWith(".js"))   return "application/javascript";
+  if (path.endsWith(".png"))  return "image/png";
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+  if (path.endsWith(".ico"))  return "image/x-icon";
+  return "text/plain";
+}
 
 //  required for user changable perameters 
 extern SystemConfig g_config;
@@ -376,7 +384,9 @@ void serveStaticAssets(AsyncWebServer& server) {
   server.on("/static/*", HTTP_GET, [](AsyncWebServerRequest *request) {
     String path = request->url();
     if (LittleFS.exists(path.c_str())) {
-        request->send(LittleFS, path.c_str(), String());
+        String ct = getContentType(path);
+        AsyncWebServerResponse *response = request->beginResponse(LittleFS, path.c_str(), ct);
+        request->send(response);
     } else {
         request->send(404, "text/plain", "Not found");
     }
@@ -385,9 +395,10 @@ void serveStaticAssets(AsyncWebServer& server) {
 
 void serveFavicon(AsyncWebServer& server) {
     // We have access to LittleFS here
-    server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
+   server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (LittleFS.exists("/favicon.png")) {
-        request->send(LittleFS, "/favicon.png", "image/png");
+        AsyncWebServerResponse *response = request->beginResponse(LittleFS, "/favicon.png", "image/png");
+        request->send(response);
     } else {
         request->send(404);
     }
@@ -456,7 +467,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
     LOG_CAT(DBG_WEB, "WebSocket client disconnected (id=%u)\n", client ? client->id() : 0);
     
     // Log the client disconnect to the Alarm History
-    AlarmManager_event(WS_DISCONNECT, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
+    AlarmManager_event(ALM_INFO, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
     
     return;
   }
@@ -1040,28 +1051,9 @@ tempData += ",DTempAverage" + String(i + 1) + ":" + validateTemp(DTempAverage[i]
 // Memory (PSRAM & HEAP RAM) Reporting for FirstWebpage
 
 
-// --- Internal heap stats ---
-
-float pctHeapUsed = (totalHeap ? ((float)(totalHeap - freeHeap) / (float)totalHeap) * 100.0f : 0.0f);
-
-String heapJson =
-  "{\"freeBytes\":" + String(freeHeap) +
-  ",\"totalBytes\":" + String(totalHeap) +
-  ",\"pctUsed\":" + String(pctHeapUsed, 1) + "}";
-
-tempData += ",heapStats:" + heapJson;
-
-// --- PSRAM stats ---
-size_t totalPsram = heap_caps_get_total_size(P);
-size_t freePsram  = heap_caps_get_free_size(P);
-float pctPsramUsed = (totalPsram ? ((float)(totalPsram - freePsram) / (float)totalPsram) * 100.0f : 0.0f);
-
-String psramJson =
-  "{\"freeBytes\":" + String(freePsram) +
-  ",\"totalBytes\":" + String(totalPsram) +
-  ",\"pctUsed\":" + String(pctPsramUsed, 1) + "}";
-
-tempData += ",psramStats:" + psramJson;
+// Memory stats removed (ESP32-only APIs not available on Teensy 4.1)
+tempData += ",heapStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
+tempData += ",psramStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
 
 
 
@@ -1104,7 +1096,8 @@ void broadcastMessageOverWebSocket(const String& message, const String& messageT
     // Only send to connected clients
     if (client->status() != WS_CONNECTED) continue;
 if (client->queueIsFull() || !client->canSend()) continue;
-if (client->text(message)) sent++;
+client->text(message);
+sent++;
   }
 
   // Optional: useful when diagnosing storms / slow clients
@@ -1666,7 +1659,9 @@ void setupRoutes() {
             String filePath = "/" + filename; // Assuming files are in the root directory
             if (LittleFS.exists(filePath.c_str())) {
     LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
-    request->send(LittleFS, filePath.c_str(), String());
+    String ct = getContentType(filePath);
+AsyncWebServerResponse *response = request->beginResponse(LittleFS, filePath.c_str(), ct);
+request->send(response);
 
             } else {
     LOG_CAT(DBG_WEB, "[HTTP] File not found: %s\n", filePath.c_str());
