@@ -316,7 +316,7 @@ bool loadDiagSerialConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH.c_str(), FILE_READ);
+  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_READ);
   if (!f) {
     xSemaphoreGive(fileSystemMutex);
     return false;

@@ -1,5 +1,6 @@
 // WebServerManager1.cpp
 #include "WebServerManager.h"
+#include <Arduino.h>
 #include "AlarmManager.h"
 #include "NetworkManager.h"
 #include "AlarmWebpage.h"
@@ -385,8 +386,7 @@ void serveStaticAssets(AsyncWebServer& server) {
     String path = request->url();
     if (LittleFS.exists(path.c_str())) {
         String ct = getContentType(path);
-        AsyncWebServerResponse *response = request->beginResponse(LittleFS, path.c_str(), ct);
-        request->send(response);
+        request->send(LittleFS, path.c_str(), ct);
     } else {
         request->send(404, "text/plain", "Not found");
     }
@@ -395,13 +395,8 @@ void serveStaticAssets(AsyncWebServer& server) {
 
 void serveFavicon(AsyncWebServer& server) {
     // We have access to LittleFS here
-   server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (LittleFS.exists("/favicon.png")) {
-        AsyncWebServerResponse *response = request->beginResponse(LittleFS, "/favicon.png", "image/png");
-        request->send(response);
-    } else {
-        request->send(404);
-    }
+   server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/favicon.png", "image/png");
 });
 }
 
@@ -880,7 +875,7 @@ void sendDateTime(AsyncWebSocketClient* client) {
 
 // Send uptime to client
 void sendUptime(AsyncWebSocketClient* client) {
-    String uptimeData = "Uptime:" + String(uptime_formatter::getUptime());
+    String uptimeData = "Uptime:" + String(UptimeFormatter::getUptime());
     
     if (client) {
         client->text(uptimeData);
@@ -1145,7 +1140,7 @@ unsigned long calculateTotalLogRuntime(const String& logFilename) {
     return 0;
   }
 
-  File logFile = LittleFS.open(logFilename.c_str().c_str(), FILE_READ);
+  File logFile = LittleFS.open(logFilename.c_str(), FILE_READ);
     if (!logFile) {
     LOG_ERR("[FS] Failed to open: %s\n", logFilename.c_str());
     giveFsMutex();
@@ -1305,7 +1300,7 @@ unsigned long aggregateMonthlyLogsReport(int pumpIndex, DateTime currentTime) {
 
   }
 
-  if (LittleFS.exists(dailyLogFilename)) {
+  if (LittleFS.exists(dailyLogFilename.c_str())) {
     File dailyLogFile = LittleFS.open(dailyLogFilename.c_str(), FILE_READ);
     if (dailyLogFile) {
       char currentMonth[8];
@@ -1353,7 +1348,7 @@ unsigned long aggregatePreviousMonthlyLogsReport(int pumpIndex, DateTime current
 
   }
 
-  if (!LittleFS.exists(monthlyLogFilename)) {
+  if (!LittleFS.exists(monthlyLogFilename.c_str())) {
     giveFsMutex();
     return 0;
   }
@@ -1410,7 +1405,7 @@ unsigned long aggregateYearlyLogsReport(int pumpIndex, DateTime currentTime) {
 
   }
 
-  if (!LittleFS.exists(monthlyLogFilename)) {
+  if (!LittleFS.exists(monthlyLogFilename.c_str())) {
     giveFsMutex();
     return totalRuntimeSeconds;
   }
@@ -1463,7 +1458,7 @@ unsigned long aggregatePreviousYearlyLogsReport(int pumpIndex, DateTime currentT
 
   }
 
-  if (!LittleFS.exists(yearlyLogFilename)) {
+  if (!LittleFS.exists(yearlyLogFilename.c_str())) {
     giveFsMutex();
     return 0;
   }
@@ -1525,7 +1520,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
     LittleFS.mkdir("/Pump_Logs");
   }
 
-  if (!LittleFS.exists(filename)) {
+  if (!LittleFS.exists(filename.c_str())) {
     LOG_CAT(DBG_FS, "Skipping missing file: %s\n", filename.c_str());
     xSemaphoreGive(fileSystemMutex);
     return 0;
