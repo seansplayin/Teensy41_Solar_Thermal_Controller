@@ -35,50 +35,27 @@ static void finishFsLockedStream(FsLockedStreamSession *s) {
 }
 
 // Recursive delete helper (caller must hold fileSystemMutex!)
-static bool deletePathRecursiveUnlocked(const String &path) {
-  // Never allow deleting root
-  if (path == "/") return false;
-
-  File node = LittleFS.open(path.c_str());
-  if (!node) {
-    // If it doesn't exist, treat as "already gone"
-    return !LittleFS.exists(path.c_str());
-  }
-
-  bool isDir = node.isDirectory();
-  node.close();
-
-  if (!isDir) {
-    return LittleFS.remove(path.c_str());
-  }
-
-  // Directory: delete children first
-  File dir = LittleFS.open(path.c_str());
-  if (!dir || !dir.isDirectory()) {
-    if (dir) dir.close();
-    // last-ditch attempt
-    return LittleFS.rmdir(path.c_str()) || LittleFS.remove(path.c_str());
-  }
+static bool deletePathRecursiveUnlocked(const String& path) {
+  if (!path.length()) return false;
+  const char* p = path.c_str();
 
   bool ok = true;
-  File entry = dir.openNextFile();
-  while (entry) {
-    String childPath = String(entry.name());  // full path
-    bool childIsDir = entry.isDirectory();
-    entry.close();
-
-    if (childIsDir) {
-      ok = deletePathRecursiveUnlocked(childPath) && ok;
-    } else {
-      ok = LittleFS.remove(childPath.c_str()) && ok;
+  if (LittleFS.isDirectory(p)) {
+    File dir = LittleFS.open(p, FILE_READ);
+    if (dir) {
+      File entry = dir.openNextFile();
+      while (entry) {
+        String child = path + "/" + String(entry.name());
+        ok = deletePathRecursiveUnlocked(child) && ok;
+        entry.close();
+        entry = dir.openNextFile();
+      }
+      dir.close();
     }
-
-    vTaskDelay(1);
-    entry = dir.openNextFile();
+    ok = LittleFS.rmdir(p) && ok;
+  } else {
+    ok = LittleFS.remove(p) && ok;
   }
-  dir.close();
-
-  ok = (LittleFS.rmdir(path) || LittleFS.remove(path)) && ok;
   return ok;
 }
 
@@ -1036,7 +1013,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    if (!LittleFS.exists(path)) {
+    if (!LittleFS.exists(path.c_str())) {
       xSemaphoreGive(fileSystemMutex);
       req->send(404, "text/plain", "not found");
       return;
@@ -1049,7 +1026,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    s->f = LittleFS.open(path, "r");
+    s->f = LittleFS.open(path.c_str(), FILE_READ);
     if (!s->f) {
       delete s;
       xSemaphoreGive(fileSystemMutex);
@@ -1103,7 +1080,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    if (!LittleFS.exists(path)) {
+    if (!LittleFS.exists(path.c_str())) {
       xSemaphoreGive(fileSystemMutex);
       req->send(404, "text/plain", "not found");
       return;
@@ -1116,7 +1093,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    s->f = LittleFS.open(path, "r");
+    s->f = LittleFS.open(path.c_str(), FILE_READ);
     if (!s->f) {
       delete s;
       xSemaphoreGive(fileSystemMutex);
@@ -1181,7 +1158,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    if (!LittleFS.exists(path)) {
+    if (!LittleFS.exists(path.c_str())) {
       xSemaphoreGive(fileSystemMutex);
       req->send(404, "text/plain", "not found");
       return;
@@ -1213,13 +1190,13 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    if (LittleFS.exists(path)) {
+    if (LittleFS.exists(path.c_str())) {
       xSemaphoreGive(fileSystemMutex);
       req->send(409, "text/plain", "already exists");
       return;
     }
 
-    bool created = LittleFS.mkdir(path);
+    bool created = LittleFS.mkdir(path.c_str());
     xSemaphoreGive(fileSystemMutex);
 
     if (created) {
@@ -1279,7 +1256,7 @@ void setupThirdPageRoutes() {
           LittleFS.mkdir(mk.c_str());
         }
 
-        uploadFile = LittleFS.open(fullPath.c_str(), "w");
+        uploadFile = LittleFS.open(fullPath.c_str(), FILE_WRITE);
                 if (!uploadFile) {
           LOG_ERR("[FS] /fs/upload: open failed: %s\n", fullPath.c_str());
           xSemaphoreGive(fileSystemMutex);
