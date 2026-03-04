@@ -39,8 +39,14 @@ static bool deletePathRecursiveUnlocked(const String& path) {
   if (!path.length()) return false;
   const char* p = path.c_str();
 
+  // Open first to check if it's a directory (LittleFS instance has no isDirectory())
+  File check = LittleFS.open(p, FILE_READ);
+  if (!check) return false;
+  bool isDir = check.isDirectory();
+  check.close();
+
   bool ok = true;
-  if (LittleFS.isDirectory(p)) {
+  if (isDir) {
     File dir = LittleFS.open(p, FILE_READ);
     if (dir) {
       File entry = dir.openNextFile();
@@ -899,7 +905,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    File f = LittleFS.open(filePath.c_str(), "r");
+    File f = LittleFS.open(filePath.c_str(), FILE_READ);
     if (!f) {
       xSemaphoreGive(fileSystemMutex);
       req->send(500, "application/json", "{\"error\":\"open failed\"}");
@@ -952,7 +958,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    File root = LittleFS.open(dir.c_str());
+    File root = LittleFS.open(dir.c_str(), FILE_READ);
     if (!root || !root.isDirectory()) {
       if (root) root.close();
       xSemaphoreGive(fileSystemMutex);

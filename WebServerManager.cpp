@@ -281,7 +281,7 @@ static void onAlarmStateChanged(uint32_t activeCount) {
 }
 
 void broadcastAlarmStateOverWebSocket() {
-  uint32_t n = AlarmManager_activeCount();
+  uint32_t n = AlarmManager_getActiveCount();
   sendAlarmStateWs(n);
 }
 
@@ -389,8 +389,8 @@ void startServer() {
     initWebSocket();          // Initialize WebSocket
     setupRoutes();            // Setup additional routes
     ensurePumpRuntimeJsonMutex();
-    setupAlarmRoutes(server);
-    AlarmManager_setStateChangedCallback(onAlarmStateChanged);
+    setupAlarmRoutes();
+    AlarmManager_setAlarmStateCallback(onAlarmStateChanged);
     server.begin();           // Start the server
 }
 
@@ -444,7 +444,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
     LOG_CAT(DBG_WEB, "WebSocket client disconnected (id=%u)\n", client ? client->id() : 0);
     
     // Log the client disconnect to the Alarm History
-    AlarmManager_event(ALM_WS_DISCONNECT, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
+    AlarmManager_event(WS_DISCONNECT, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
     
     return;
   }
@@ -472,7 +472,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
   // FirstWebpage sends "init" after it opens
   if (msg == "init") {
     // Restore what you used to do on WS connect
-    int dhwCall  = (digitalRead(DHW_HEATING_PIN) == LOW);
+    int dhwCall = (digitalRead(DHW_HEATING_PIN) == 0);  // LOW is 0 on Teensy
     int heatCall = (digitalRead(FURNACE_HEATING_PIN) == LOW);
     sendHeatingCallStatus(dhwCall, heatCall);
 
@@ -482,7 +482,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
       sendTimeConfig(client);
       sendSystemStats(client);
 
-      uint32_t n = AlarmManager_activeCount();
+      uint32_t n = AlarmManager_getActiveCount();
       client->text((n > 0)
         ? ("AlarmState:ALARM,count=" + String(n))
         :  "AlarmState:OK,count=0");
@@ -857,7 +857,7 @@ void sendDateTime(AsyncWebSocketClient* client) {
 
 // Send uptime to client
 void sendUptime(AsyncWebSocketClient* client) {
-    String uptimeData = "Uptime:" + uptime_formatter::getUptime();
+    String uptimeData = "Uptime:" + String(uptime_formatter::getUptime());
     
     if (client) {
         client->text(uptimeData);
