@@ -386,7 +386,12 @@ void serveStaticAssets(AsyncWebServer& server) {
     String path = request->url();
     if (LittleFS.exists(path.c_str())) {
         String ct = getContentType(path);
-        request->send(LittleFS, path.c_str(), ct);
+        File file = LittleFS.open(path.c_str(), "r");
+        if (file) {
+            request->send(file, ct, file.size());
+        } else {
+            request->send(404, "text/plain", "Not found");
+        }
     } else {
         request->send(404, "text/plain", "Not found");
     }
@@ -396,7 +401,12 @@ void serveStaticAssets(AsyncWebServer& server) {
 void serveFavicon(AsyncWebServer& server) {
     // We have access to LittleFS here
    server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(LittleFS, "/favicon.png", "image/png");
+    File f = LittleFS.open("/favicon.png", "r");
+    if (f) {
+        request->send(f, "image/png", f.size());
+    } else {
+        request->send(404, "text/plain", "Not found");
+    }
 });
 }
 
@@ -1642,31 +1652,35 @@ void setupRoutes() {
     });
 
     // Serve a specific log file for download from the root directory
-    server.on("/download-log", HTTP_GET, [](AsyncWebServerRequest* request) {
-        if (request->hasParam("file")) {
-            String filename = request->getParam("file")->value();
-            // Security check: avoid directory traversal
-            if (filename.indexOf('/') != -1 || filename.indexOf('\\') != -1) {
-                request->send(400, "text/plain", "Invalid file path");
-                return;
-            }
-            // Debug: Check if file exists
-            String filePath = "/" + filename; // Assuming files are in the root directory
-            if (LittleFS.exists(filePath.c_str())) {
-    LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
-    String ct = getContentType(filePath);
-AsyncWebServerResponse *response = request->beginResponse(LittleFS, filePath.c_str(), ct);
-request->send(response);
+   // Serve a specific log file for download from the root directory
+server.on("/download-log", HTTP_GET, [](AsyncWebServerRequest* request) {
+    if (request->hasParam("file")) {
+        String filename = request->getParam("file")->value();
+        // Security check: avoid directory traversal
+        if (filename.indexOf('/') != -1 || filename.indexOf('\\') != -1) {
+            request->send(400, "text/plain", "Invalid file path");
+            return;
+        }
+        // Debug: Check if file exists
+        String filePath = "/" + filename; // Assuming files are in the root directory
+        if (LittleFS.exists(filePath.c_str())) {
+            LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
+            String ct = getContentType(filePath);
 
+            File file = LittleFS.open(filePath.c_str(), "r");
+            if (file) {
+                request->send(file, ct, file.size());
             } else {
-    LOG_CAT(DBG_WEB, "[HTTP] File not found: %s\n", filePath.c_str());
-    request->send(404, "text/plain", "File not found");
-
+                request->send(404, "text/plain", "Not found");
             }
         } else {
-            request->send(400, "text/plain", "Missing file parameter");
+            LOG_CAT(DBG_WEB, "[HTTP] File not found: %s\n", filePath.c_str());
+            request->send(404, "text/plain", "File not found");
         }
-    });
+    } else {
+        request->send(400, "text/plain", "Missing file parameter");
+    }
+});
 
         // -- FS stats route --
     server.on("/fs-stats", HTTP_GET, [](AsyncWebServerRequest* request) {
