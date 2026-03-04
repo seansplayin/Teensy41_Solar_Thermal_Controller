@@ -200,12 +200,12 @@ static bool persistUnlocked() {
     return false;
   }
 
-  if (!LittleFS.exists(DIR_PATH.c_str())) LittleFS.mkdir(DIR_PATH.c_str());
+  if (!LittleFS.exists(DIR_PATH)) LittleFS.mkdir(DIR_PATH);
 
   // Rewrite file atomically:
-  if (LittleFS.exists(TMP_PATH.c_str())) LittleFS.remove(TMP_PATH.c_str());
+  if (LittleFS.exists(TMP_PATH)) LittleFS.remove(TMP_PATH);
 
-  File f = LittleFS.open(TMP_PATH.c_str(), "w");
+  File f = LittleFS.open(TMP_PATH, "w");
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
   // Write all records in group order (newest first per group)
@@ -225,8 +225,8 @@ static bool persistUnlocked() {
   f.close();
 
   // Replace old file
-  if (LittleFS.exists(LOG_PATH.c_str())) LittleFS.remove(LOG_PATH.c_str());
-  bool ok = LittleFS.rename(TMP_PATH.c_str(), LOG_PATH.c_str());
+  if (LittleFS.exists(LOG_PATH)) LittleFS.remove(LOG_PATH);
+  bool ok = LittleFS.rename(TMP_PATH, LOG_PATH);
 
   xSemaphoreGive(fileSystemMutex);
   return ok;
@@ -240,12 +240,12 @@ static void loadFromFSUnlocked() {
     return;
   }
 
-  if (!LittleFS.exists(LOG_PATH.c_str())) {
+  if (!LittleFS.exists(LOG_PATH)) {
     xSemaphoreGive(fileSystemMutex);
     return;
   }
 
-  File f = LittleFS.open(LOG_PATH.c_str(), "r");
+  File f = LittleFS.open(LOG_PATH, "r");
   if (!f) { xSemaphoreGive(fileSystemMutex); return; }
 
   char line[256];

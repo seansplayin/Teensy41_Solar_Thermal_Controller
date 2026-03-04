@@ -112,7 +112,7 @@ bool loadSystemConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(SYSTEM_CONFIG_PATH.c_str(), "r");
+  File f = LittleFS.open(SYSTEM_CONFIG_PATH, "r");
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -239,7 +239,7 @@ bool loadTimeConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(TIME_CONFIG_PATH.c_str(), "r");
+  File f = LittleFS.open(TIME_CONFIG_PATH, "r");
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -316,7 +316,7 @@ bool loadDiagSerialConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH.c_str(), "r");
+  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, "r");
   if (!f) {
     xSemaphoreGive(fileSystemMutex);
     return false;
@@ -361,7 +361,7 @@ bool saveDiagSerialConfigToFS() {
   doc["diagSerialEnable"] = g_config.diagSerialEnable;
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH.c_str(), "w");
+  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, "w");
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
   serializeJson(doc, f);
