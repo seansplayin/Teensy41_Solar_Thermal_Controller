@@ -386,7 +386,7 @@ void serveStaticAssets(AsyncWebServer& server) {
     String path = request->url();
     if (LittleFS.exists(path.c_str())) {
         String ct = getContentType(path);
-        File file = LittleFS.open(path.c_str(), "r");
+        File file = LittleFS.open(path.c_str(), FILE_READ);
         if (file) {
             request->send(file, ct, file.size());
         } else {
@@ -401,7 +401,7 @@ void serveStaticAssets(AsyncWebServer& server) {
 void serveFavicon(AsyncWebServer& server) {
     // We have access to LittleFS here
    server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request){
-    File f = LittleFS.open("/favicon.png", "r");
+    File f = LittleFS.open("/favicon.png", FILE_READ);
     if (f) {
         request->send(f, "image/png", f.size());
     } else {
@@ -472,7 +472,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
     LOG_CAT(DBG_WEB, "WebSocket client disconnected (id=%u)\n", client ? client->id() : 0);
     
     // Log the client disconnect to the Alarm History
-    AlarmManager_event(ALM_INFO, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
+    AlarmManager_event(WS_DISCONNECT, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
     
     return;
   }
@@ -1667,7 +1667,7 @@ server.on("/download-log", HTTP_GET, [](AsyncWebServerRequest* request) {
             LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
             String ct = getContentType(filePath);
 
-            File file = LittleFS.open(filePath.c_str(), "r");
+            File file = LittleFS.open(filePath.c_str(), FILE_READ);
             if (file) {
                 request->send(file, ct, file.size());
             } else {
@@ -1755,7 +1755,6 @@ void setupLogDataRoute() {
 
 
 // Respond to 'Update All' request from Webpage
-// In WebServerManager.cpp
 
 void refreshRuntimeCache() {
     DateTime currentTime = getCurrentTimeAtomic();
