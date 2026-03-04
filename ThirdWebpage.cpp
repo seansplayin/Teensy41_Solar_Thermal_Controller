@@ -1151,7 +1151,7 @@ void setupThirdPageRoutes() {
 
   
   // Download directory as tar.gz (ON-THE-FLY streaming, no temp file)
-  TarGZ::registerRoutes(server);
+ // TarGZ::registerRoutes(server);
 
 
 

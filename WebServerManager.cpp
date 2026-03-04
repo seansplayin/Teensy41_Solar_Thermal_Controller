@@ -101,7 +101,7 @@ static String wsBytesToString(const uint8_t* data, size_t len) {
   String s;
   if (!data || len == 0) return s;
   s.reserve(len);
-  s.concat((const char*)data, len);   // copies exactly len bytes; no NUL needed
+  for (size_t i = 0; i < len; i++) s.concat((char)data[i]);
   return s;
 }
 

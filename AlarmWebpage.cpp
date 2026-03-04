@@ -62,7 +62,7 @@ static void handleDeleteBody(AsyncWebServerRequest* request,
     ((String*)request->_tempObject)->reserve(total);
   }
   String* body = (String*)request->_tempObject;
-  body->concat( String((const char*)data, len) );
+  for (size_t i = 0; i < len; i++) body->concat((char)data[i]);
   if (index + len != total) return;
 
   DynamicJsonDocument doc(4096);
