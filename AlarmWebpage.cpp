@@ -62,7 +62,7 @@ static void handleDeleteBody(AsyncWebServerRequest* request,
     ((String*)request->_tempObject)->reserve(total);
   }
   String* body = (String*)request->_tempObject;
-  body->concat((const char*)data, len);
+  body->concat( String((const char*)data, len) );
   if (index + len != total) return;
 
   DynamicJsonDocument doc(4096);
@@ -103,7 +103,7 @@ static void handleDeleteBody(AsyncWebServerRequest* request,
 
 void setupAlarmRoutes() {          // same signature as your ESP version
   server.on("/alarm-log", HTTP_GET, [](AsyncWebServerRequest *req){
-    req->send_P(200, "text/html; charset=UTF-8", alarmLogHtml);
+    req->send(200, "text/html; charset=UTF-8", alarmLogHtml);
   });
 
   server.on("/api/alarm-log", HTTP_GET, [](AsyncWebServerRequest* req){

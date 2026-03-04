@@ -1751,6 +1751,6 @@ String processor(const String& var) {
 
 void setupFirstPageRoutes() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html; charset=UTF-8", firstPageHtml, processor);
+    request->send(200, "text/html; charset=UTF-8", firstPageHtml, processor);
   });
 }

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LittleFS.h>
+LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 
 #include <arduino_freertos.h>
 
@@ -35,7 +36,7 @@ SemaphoreHandle_t temperatureMutex = nullptr;
 SemaphoreHandle_t fileSystemMutex = nullptr;
 
 String g_tempWsPayload = "";
-bool g_sendTemperatures = false;
+volatile bool g_sendTemperatures = false;
 // std::mutex g_tempWsPayloadMutex;  // Uncomment if using std::mutex
 
 
@@ -70,6 +71,13 @@ static void TaskControllerMain(void* pvParameters) {
 // --- BOOTLOADER ---
 void setup() {
   Serial.begin(115200);
+
+  if (!LittleFS.begin(0)) {               // 0 = use all available program flash
+    Serial.println("LittleFS mount FAILED!");
+    while (1);                          // halt if no filesystem
+  }
+  Serial.println("LittleFS mounted OK");
+
   while (!Serial && millis() < 4000); 
 
   Serial.println("--- TEENSY 4.1 SOLAR CONTROLLER STARTING ---");

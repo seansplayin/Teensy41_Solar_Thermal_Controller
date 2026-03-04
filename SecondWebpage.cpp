@@ -410,6 +410,6 @@ void readPumpLogFiles(
       page.replace("%PREVIOUS_MONTH%", pm);
       page.replace("%CURRENT_YEAR%", cy);
       page.replace("%PREVIOUS_YEAR%", py);
-      request->send_P(200, "text/html", page.c_str());
+      request->send(200, "text/html", page.c_str());
     });
   }

@@ -25,7 +25,7 @@
 #include "Config.h"
 #include "AlarmHistory.h"
 #include "MemoryStats.h"
-#include "TarGZ.h"
+//#include "TarGZ.h"
 #include "DiagLog.h"
 
 // Remove ESP specific headers
