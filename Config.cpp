@@ -112,7 +112,7 @@ bool loadSystemConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(SYSTEM_CONFIG_PATH, "r");
+  File f = LittleFS.open(SYSTEM_CONFIG_PATH.c_str(), FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -239,7 +239,7 @@ bool loadTimeConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(TIME_CONFIG_PATH, "r");
+  File f = LittleFS.open(TIME_CONFIG_PATH.c_str(), FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
@@ -316,7 +316,7 @@ bool loadDiagSerialConfigFromFS() {
     return false;
   }
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, "r");
+  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH.c_str(), FILE_READ);
   if (!f) {
     xSemaphoreGive(fileSystemMutex);
     return false;

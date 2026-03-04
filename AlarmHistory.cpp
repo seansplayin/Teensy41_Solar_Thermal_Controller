@@ -245,7 +245,7 @@ static void loadFromFSUnlocked() {
     return;
   }
 
-  File f = LittleFS.open(LOG_PATH, "r");
+  File f = LittleFS.open(LOG_PATH.c_str(), FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return; }
 
   char line[256];

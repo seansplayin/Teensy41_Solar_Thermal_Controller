@@ -1152,7 +1152,7 @@ unsigned long calculateTotalLogRuntime(const String& logFilename) {
     return 0;
   }
 
-  File logFile = LittleFS.open(logFilename.c_str(), "r");
+  File logFile = LittleFS.open(logFilename.c_str().c_str(), FILE_READ);
     if (!logFile) {
     LOG_ERR("[FS] Failed to open: %s\n", logFilename.c_str());
     giveFsMutex();
@@ -1256,12 +1256,12 @@ unsigned long aggregatePreviousDailyLogsReport(int pumpIndex, DateTime currentTi
 
   }
 
-  if (!LittleFS.exists(dailyLogFilename)) {
+  if (!LittleFS.exists(dailyLogFilename.c_str())) {
     giveFsMutex();
     return 0;
   }
 
-  File dailyLogFile = LittleFS.open(dailyLogFilename, "r");
+  File dailyLogFile = LittleFS.open(dailyLogFilename.c_str(), FILE_READ);
   if (!dailyLogFile) {
     LOG_CAT(DBG_PUMP_RUN_TIME_UI, "[FS] Failed to open: %s\n", dailyLogFilename.c_str());
     giveFsMutex();
@@ -1313,7 +1313,7 @@ unsigned long aggregateMonthlyLogsReport(int pumpIndex, DateTime currentTime) {
   }
 
   if (LittleFS.exists(dailyLogFilename)) {
-    File dailyLogFile = LittleFS.open(dailyLogFilename, "r");
+    File dailyLogFile = LittleFS.open(dailyLogFilename.c_str(), FILE_READ);
     if (dailyLogFile) {
       char currentMonth[8];
       snprintf(currentMonth, sizeof(currentMonth), "%04d-%02d", currentTime.year(), currentTime.month());
@@ -1365,7 +1365,7 @@ unsigned long aggregatePreviousMonthlyLogsReport(int pumpIndex, DateTime current
     return 0;
   }
 
-  File monthlyLogFile = LittleFS.open(monthlyLogFilename, "r");
+  File monthlyLogFile = LittleFS.open(monthlyLogFilename.c_str(), FILE_READ);
   if (!monthlyLogFile) {
     LOG_CAT(DBG_PUMP_RUN_TIME_UI, "[FS] Failed to open: %s\n", monthlyLogFilename.c_str());
     giveFsMutex();
@@ -1422,7 +1422,7 @@ unsigned long aggregateYearlyLogsReport(int pumpIndex, DateTime currentTime) {
     return totalRuntimeSeconds;
   }
 
-  File monthlyLogFile = LittleFS.open(monthlyLogFilename, "r");
+  File monthlyLogFile = LittleFS.open(monthlyLogFilename.c_str(), FILE_READ);
   if (!monthlyLogFile) {
     LOG_CAT(DBG_PUMP_RUN_TIME_UI, "[FS] Failed to open: %s\n", monthlyLogFilename.c_str());
     giveFsMutex();
@@ -1475,7 +1475,7 @@ unsigned long aggregatePreviousYearlyLogsReport(int pumpIndex, DateTime currentT
     return 0;
   }
 
-  File yearlyLogFile = LittleFS.open(yearlyLogFilename, "r");
+  File yearlyLogFile = LittleFS.open(yearlyLogFilename.c_str(), FILE_READ);
   if (!yearlyLogFile) {
     LOG_CAT(DBG_PUMP_RUN_TIME_UI, "[FS] Failed to open: %s\n", yearlyLogFilename.c_str());
     giveFsMutex();
@@ -1538,7 +1538,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
     return 0;
   }
 
-  File file = LittleFS.open(filename, "r");
+  File file = LittleFS.open(filename.c_str(), FILE_READ);
   if (!file || file.size() == 0) {
     if (file) file.close();
     LOG_CAT(DBG_FS, "Invalid or empty file: %s\n", filename.c_str());
@@ -1550,7 +1550,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
   while (file.available()) {
     String line = file.readStringUntil('\n');
     line.trim();
-    if (line.isEmpty()) continue;
+    if (line.length() == 0) continue;
 
     // ✅ Correct parsing (your old +15 logic made runtimeStartIndex never -1)
     int idx = line.indexOf("Total Runtime: ");

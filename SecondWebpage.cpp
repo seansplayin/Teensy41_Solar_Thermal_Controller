@@ -324,7 +324,7 @@ void readPumpLogFiles(
 
   // Daily log
   String dailyFileName = "/Pump_Logs/pump" + String(i) + "_Daily.txt";
-  File dailyFile = openLogFileLocked(dailyFileName, "r");
+  File dailyFile = openLogFileLocked(dailyFileName.c_str(), FILE_READ);
   if (dailyFile) {
     while (dailyFile.available()) {
       String line = dailyFile.readStringUntil('\n');
@@ -355,7 +355,7 @@ void readPumpLogFiles(
 
   // Monthly log
   String monthlyFileName = "/Pump_Logs/pump" + String(i) + "_Monthly.txt";
-  File monthlyFile = openLogFileLocked(monthlyFileName, "r");
+  File monthlyFile = openLogFileLocked(monthlyFileName.c_str(), FILE_READ);
   if (monthlyFile) {
     while (monthlyFile.available()) {
       String line = monthlyFile.readStringUntil('\n');
@@ -376,7 +376,7 @@ void readPumpLogFiles(
 
   // Yearly log
   String yearlyFileName = "/Pump_Logs/pump" + String(i) + "_Yearly.txt";
-  File yearlyFile = openLogFileLocked(yearlyFileName, "r");
+  File yearlyFile = openLogFileLocked(yearlyFileName.c_str(), FILE_READ);
   if (yearlyFile) {
     while (yearlyFile.available()) {
       String line = yearlyFile.readStringUntil('\n');
