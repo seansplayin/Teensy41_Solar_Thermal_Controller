@@ -1151,12 +1151,12 @@ unsigned long calculateTotalLogRuntime(const String& logFilename) {
   }
 
 
-  if (!LittleFS.exists(logFilename)) {
+  if (!LittleFS.exists(logFilename.c_str())) {
     giveFsMutex();
     return 0;
   }
 
-  File logFile = LittleFS.open(logFilename, "r");
+  File logFile = LittleFS.open(logFilename.c_str(), "r");
     if (!logFile) {
     LOG_ERR("[FS] Failed to open: %s\n", logFilename.c_str());
     giveFsMutex();
@@ -1668,9 +1668,9 @@ void setupRoutes() {
             }
             // Debug: Check if file exists
             String filePath = "/" + filename; // Assuming files are in the root directory
-            if (LittleFS.exists(filePath)) {
+            if (LittleFS.exists(filePath.c_str())) {
     LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
-    request->send(LittleFS, filePath, String(), true);
+    request->send(LittleFS, filePath.c_str(), String(), true);
 
             } else {
     LOG_CAT(DBG_WEB, "[HTTP] File not found: %s\n", filePath.c_str());

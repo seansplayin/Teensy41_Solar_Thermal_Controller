@@ -72,7 +72,7 @@ static void TaskControllerMain(void* pvParameters) {
 void setup() {
   Serial.begin(115200);
 
-  if (!LittleFS.begin(0)) {               // 0 = use all available program flash
+  if (!LittleFS.begin()) {              // 0 = use all available program flash
     Serial.println("LittleFS mount FAILED!");
     while (1);                          // halt if no filesystem
   }

@@ -8,6 +8,18 @@
 // FreeRTOS
 #include <arduino_freertos.h>
 #include <semphr.h>
+#include <LittleFS.h>
+
+// === ADD THESE THREE LINES ===
+extern LittleFS_QSPI FlashFS;     // matches FileSystemManager.h
+#define LittleFS FlashFS          // makes ALL your existing LittleFS. calls work instantly
+// =============================
+
+// ==================== DEFAULTS ====================
+#define DEFAULT_TIMEZONE_ID     "UTC"      // String, not int!
+#define DEFAULT_DST_ENABLED     false
+// =================================================
+
 
 // ====================== DIAGNOSTICS ======================
 #ifndef ENABLE_SERIAL_DIAGNOSTICS
