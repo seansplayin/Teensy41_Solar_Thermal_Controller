@@ -1,5 +1,6 @@
 // WebServerManager1.cpp
 #include "WebServerManager.h"
+#include "AlarmManager.h"
 #include "NetworkManager.h"
 #include "AlarmWebpage.h"
 #include "Logging.h"
@@ -281,7 +282,7 @@ static void onAlarmStateChanged(uint32_t activeCount) {
 }
 
 void broadcastAlarmStateOverWebSocket() {
-  uint32_t n = AlarmManager_getActiveCount();
+  uint32_t n = AlarmManager_activeCount();
   sendAlarmStateWs(n);
 }
 
@@ -372,14 +373,25 @@ void sendTimeConfig(AsyncWebSocketClient* client) {
 }
 
 void serveStaticAssets(AsyncWebServer& server) {
-  server.serveStatic("/static/", LittleFS, "/static/");
-  // optional caching:
-  // server.serveStatic("/static/", LittleFS, "/static/").setCacheControl("max-age=86400");
+  server.on("/static/*", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String path = request->url();
+    if (LittleFS.exists(path.c_str())) {
+        request->send(LittleFS, path.c_str(), String());
+    } else {
+        request->send(404, "text/plain", "Not found");
+    }
+});
 }
 
 void serveFavicon(AsyncWebServer& server) {
     // We have access to LittleFS here
-    server.serveStatic("/favicon.png", LittleFS, "/favicon.png");
+    server.on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (LittleFS.exists("/favicon.png")) {
+        request->send(LittleFS, "/favicon.png", "image/png");
+    } else {
+        request->send(404);
+    }
+});
 }
 
 // Start the server
@@ -390,7 +402,7 @@ void startServer() {
     setupRoutes();            // Setup additional routes
     ensurePumpRuntimeJsonMutex();
     setupAlarmRoutes();
-    AlarmManager_setAlarmStateCallback(onAlarmStateChanged);
+    AlarmManager_setStateChangedCallback(onAlarmStateChanged);
     server.begin();           // Start the server
 }
 
@@ -473,7 +485,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
   if (msg == "init") {
     // Restore what you used to do on WS connect
     int dhwCall = (digitalRead(DHW_HEATING_PIN) == 0);  // LOW is 0 on Teensy
-    int heatCall = (digitalRead(FURNACE_HEATING_PIN) == LOW);
+    int heatCall = (digitalRead(FURNACE_HEATING_PIN) == 0);
     sendHeatingCallStatus(dhwCall, heatCall);
 
         if (client && !client->queueIsFull()) {
@@ -482,7 +494,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
       sendTimeConfig(client);
       sendSystemStats(client);
 
-      uint32_t n = AlarmManager_getActiveCount();
+      uint32_t n = AlarmManager_activeCount();
       client->text((n > 0)
         ? ("AlarmState:ALARM,count=" + String(n))
         :  "AlarmState:OK,count=0");
@@ -1026,12 +1038,10 @@ tempData += ",DTempAverage" + String(i + 1) + ":" + validateTemp(DTempAverage[i]
 
 
 // Memory (PSRAM & HEAP RAM) Reporting for FirstWebpage
-const uint32_t I = MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT;
-const uint32_t P = MALLOC_CAP_SPIRAM   | MALLOC_CAP_8BIT;
+
 
 // --- Internal heap stats ---
-size_t freeHeap  = heap_caps_get_free_size(I);
-size_t totalHeap = heap_caps_get_total_size(I);
+
 float pctHeapUsed = (totalHeap ? ((float)(totalHeap - freeHeap) / (float)totalHeap) * 100.0f : 0.0f);
 
 String heapJson =
@@ -1092,23 +1102,9 @@ void broadcastMessageOverWebSocket(const String& message, const String& messageT
   // Send only to clients that can accept data (backpressure-aware)
   for (auto &client : ws.getClients()) {
     // Only send to connected clients
-    if (client.status() != WS_CONNECTED) {
-      skipped++;
-      continue;
-    }
-
-    // Backpressure: if the client's queue is full (or can't send), skip it
-    if (client.queueIsFull() || !client.canSend()) {
-      skipped++;
-      continue;
-    }
-
-    // Send to this client only
-    if (client.text(message)) {
-      sent++;
-    } else {
-      skipped++;
-    }
+    if (client->status() != WS_CONNECTED) continue;
+if (client->queueIsFull() || !client->canSend()) continue;
+if (client->text(message)) sent++;
   }
 
   // Optional: useful when diagnosing storms / slow clients
@@ -1670,7 +1666,7 @@ void setupRoutes() {
             String filePath = "/" + filename; // Assuming files are in the root directory
             if (LittleFS.exists(filePath.c_str())) {
     LOG_CAT(DBG_WEB, "Sending file: %s\n", filePath.c_str());
-    request->send(LittleFS, filePath.c_str(), String(), true);
+    request->send(LittleFS, filePath.c_str(), String());
 
             } else {
     LOG_CAT(DBG_WEB, "[HTTP] File not found: %s\n", filePath.c_str());
