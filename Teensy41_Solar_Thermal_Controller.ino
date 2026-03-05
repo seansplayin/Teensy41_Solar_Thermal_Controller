@@ -3,7 +3,6 @@
 LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 #include <arduino_freertos.h>
 
-
 // --- Application Includes ---
 #include "Config.h"
 #include "Logging.h"
@@ -25,9 +24,9 @@ LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 #include "AlarmWebpage.h"
 #include "NetworkManager.h"
 #include "WebServerManager.h"
+#include "QNEthernet.h"  // ← ADD THIS for NetworkManager
 
 using namespace qindesign::network;
-
 
 // === Global definitions (only here!) ===
 SemaphoreHandle_t pumpStateMutex     = nullptr;
@@ -37,7 +36,6 @@ SemaphoreHandle_t fileSystemMutex    = nullptr;
 bool needToUpdatePumpRuntimes = false;
 String g_tempWsPayload = "";
 volatile bool g_sendTemperatures = false;
-
 
 // --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {
@@ -86,7 +84,8 @@ void setup() {
   // Start Scheduler
   vTaskStartScheduler();
 
-  WebServerManager_begin();
+  // REMOVE THIS LINE - it never runs after scheduler starts
+  // WebServerManager_begin();
 }
 
 void loop() {
