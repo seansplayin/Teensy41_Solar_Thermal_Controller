@@ -19,11 +19,9 @@
 #include "FileSystemManager.h"
 #include "MemoryStats.h"
 #include "TimeSync.h"   
-//#include "TarGZ.h"
 #include "DiagLog.h"
 #include <AsyncWebServer_Teensy41.h>
 #include <Teensy41_AsyncTCP.h>
-
 
 // ----- Forward declarations -----
 class AsyncWebSocketClient; 
@@ -34,23 +32,6 @@ bool saveSystemConfigToFS();
 bool resetSystemConfigToDefaults();
 bool saveTimeConfigToFS();
 bool resetTimeConfigToDefaults();
-
-
-String getContentType(const String& path) {
-  if (path.endsWith(".html")) return "text/html";
-  if (path.endsWith(".css"))  return "text/css";
-  if (path.endsWith(".js"))   return "application/javascript";
-  if (path.endsWith(".png"))  return "image/png";
-  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
-  if (path.endsWith(".ico"))  return "image/x-icon";
-  return "text/plain";
-}
-
-//  required for user changable perameters 
-extern SystemConfig g_config;
-
-// ---- new: time configuration (timezone + DST) ----
-extern TimeConfig g_timeConfig;
 
 // --- Gatekeeper Global Flags ---
 volatile bool g_sendPumpStatus = false;
@@ -137,8 +118,6 @@ static int findNextListSep(const String& s, int start) {
   return (c < p) ? c : p;
 }
 
-
-
 // --- Robust parsing helpers for setConfig: ---
 // Returns the next "key=value" pair starting at 'start'.
 // If a value contains commas, this merges tokens until the next token contains '='.
@@ -151,7 +130,7 @@ static String nextConfigPairMerged(const String& payload, int& start) {
   String pair;
   int i = start;
 
-  while (i <= n) {
+  while (i < n) {
     int comma = payload.indexOf(',', i);
     int end   = (comma == -1) ? n : comma;
 
@@ -173,10 +152,7 @@ static String nextConfigPairMerged(const String& payload, int& start) {
       }
     }
 
-    if (comma == -1) {
-      start = n;
-      return pair;
-    }
+    if (comma == -1) break;
     i = comma + 1;
   }
 
@@ -342,7 +318,6 @@ void sendConfigurationValues(AsyncWebSocketClient* client) {
     configData += ",collectorFreezeTempF:" + validateConfigValue(g_config.collectorFreezeTempF);
     configData += ",collectorFreezeConfirmMin:" + String((uint32_t)g_config.collectorFreezeConfirmMin);
     configData += ",collectorFreezeRunMin:" + String((uint32_t)g_config.collectorFreezeRunMin);
-
     configData += ",lineFreezeTempF:" + validateConfigValue(g_config.lineFreezeTempF);
     configData += ",lineFreezeConfirmMin:" + String((uint32_t)g_config.lineFreezeConfirmMin);
     configData += ",lineFreezeRunMin:" + String((uint32_t)g_config.lineFreezeRunMin);
@@ -351,18 +326,18 @@ void sendConfigurationValues(AsyncWebSocketClient* client) {
     configData += ",collectorFreezeSensors:";
     bool first = true;
     for (uint8_t* s = g_config.collectorFreezeSensors; *s; s++) {
-    if (!first) configData += "|";   // <-- CHANGED
-    configData += String(*s);
-    first = false;
+      if (!first) configData += "|";   // <-- CHANGED
+      configData += String(*s);
+      first = false;
     }
 
 
     configData += ",lineFreezeSensors:";
     first = true;
     for (uint8_t* s = g_config.lineFreezeSensors; *s; s++) {
-    if (!first) configData += "|";   // <-- CHANGED
-    configData += String(*s);
-    first = false;
+      if (!first) configData += "|";   // <-- CHANGED
+      configData += String(*s);
+      first = false;
     }
 
 
@@ -513,6 +488,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
   // FirstWebpage sends "init" after it opens
   if (msg == "init") {
     // Restore what you used to do on WS connect
+    // Restore what you used to do on WS connect
     int dhwCall = (digitalRead(DHW_HEATING_PIN) == 0);  // LOW is 0 on Teensy
     int heatCall = (digitalRead(FURNACE_HEATING_PIN) == 0);
     sendHeatingCallStatus(dhwCall, heatCall);
@@ -564,11 +540,6 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
             setAllPumpsMode(PUMP_AUTO);
         } else if (message.equals("setAllPumps:off")) {
             setAllPumpsMode(PUMP_OFF);
-        } else if (message.equals("getFsStats")) {
-            // Send the FS heap JSON back
-            String json = getFSStatsString();
-            // prefix so the client can handle it easily
-            ws.textAll("FsStats:" + json);
         } else if (message == "deleteTemperatureLogs") {
                // dangerous: only use if you intentionally want to delete all logs
                   bool ok = deleteTemperatureLogsRecursive("/Temperature_Logs");
@@ -710,7 +681,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
                  }
             }
             
-                else if (message.equals("resetTimeConfig")) {
+                else if (message == "resetTimeConfig") {
 
                 LOG_CAT(DBG_CONFIG, "[WS] Reset TimeConfig to defaults requested\n");
 
@@ -789,11 +760,11 @@ void handleRequestLogData(String message) {
 
 // Send pump statuses to client
 void sendPumpStatuses(AsyncWebSocketClient* client) {
-    DynamicJsonDocument doc(2048);
+    JsonDocument doc;  // Fixed for v7: no size needed, uses heap
     JsonArray pumps = doc.to<JsonArray>();
 
-    for (int i = 0; i < NUM_PUMPS; i++) {
-        JsonObject pump = pumps.createNestedObject();
+    for (int i = 0; i < numPumps; i++) {
+        JsonObject pump = pumps.add<JsonObject>();
         pump["pumpIndex"] = i + 1; // Adjust for 1-based indexing if needed
         pump["name"] = pumpNames[i]; // Include pump name
         pump["state"] = pumpStates[i] == PUMP_ON ? "ON" : "OFF";
@@ -817,7 +788,7 @@ void sendPumpStatuses(AsyncWebSocketClient* client) {
     }
 
     String pumpStatusData;
-    serializeJson(pumps, pumpStatusData);
+    serializeJson(doc, pumpStatusData);
 
     if (client) {
         client->text("PumpStatus:" + pumpStatusData);
@@ -854,7 +825,7 @@ void sendTemperatures(AsyncWebSocketClient* client) {
     tempData += "pt1000Average:" + String(pt1000Average) + ",";
 
     // DTemp1 to DTemp13 and their averages
-    for (int i = 0; i < NUM_SENSORS; i++) {
+    for (int i = 0; i < NUM_TEMP_SENSORS; i++) {
         tempData += "DTemp" + String(i + 1) + ":" + String(DTemp[i]) + ",";
         tempData += "DTempAverage" + String(i + 1) + ":" + String(DTempAverage[i]) + ",";
     }
@@ -864,7 +835,11 @@ void sendTemperatures(AsyncWebSocketClient* client) {
         tempData.remove(tempData.length() - 1);
     }
 
-    client->text(tempData);
+    if (client) {
+        client->text(tempData);
+    } else {
+        ws.textAll(tempData);
+    }
 }
 
 
@@ -932,7 +907,7 @@ void sendSystemStats(AsyncWebSocketClient* client) {
 
 
 
-// ===== The Gatekeeper: Single WebSocket Transmitter =====
+// ===== The Gatekeeper: Single WebSocket Transmitter Single ===
 void TaskWebSocketTransmitter(void* pvParameters) {
     (void)pvParameters;
 
@@ -1060,7 +1035,7 @@ tempData += ",PotHeatXinletT:" + validateTemp(PotHeatXinletT);
 tempData += ",PotHeatXoutletT:" + validateTemp(PotHeatXoutletT);
 tempData += ",pt1000Current:" + validateTemp(pt1000Current);
 tempData += ",pt1000Average:" + validateTemp(pt1000Average);
-for (int i = 0; i < NUM_SENSORS; i++) {
+for (int i = 0; i < NUM_TEMP_SENSORS; i++) {
 tempData += ",DTemp" + String(i + 1) + ":" + validateTemp(DTemp[i]);
 tempData += ",DTempAverage" + String(i + 1) + ":" + validateTemp(DTempAverage[i]);
 }
@@ -1333,9 +1308,9 @@ unsigned long aggregateMonthlyLogsReport(int pumpIndex, DateTime currentTime) {
         String line = dailyLogFile.readStringUntil('\n');
         line.trim();
 
-        int dateSeparatorIndex = line.indexOf(' ');
-        if (dateSeparatorIndex != -1) {
-          String date = line.substring(0, dateSeparatorIndex);
+        int s = line.indexOf(' ');
+        if (s != -1) {
+          String date = line.substring(0, s);
           if (date.startsWith(currentMonth)) {
             int runtimeStartIndex = line.indexOf("Total Runtime: ") + 15;
             int secondsIndex = line.indexOf(" seconds", runtimeStartIndex);
@@ -1531,8 +1506,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
   String filename = "/Pump_Logs/pump" + String(pumpIndex + 1) + "_Yearly.txt";
 
   // ✅ Never block forever on FS mutex (tgz can hold it for a long time)
-    if (!takeFileSystemMutexWithRetry("aggregateDecadeLogsReport",
-                                    pdMS_TO_TICKS(200), 10)) {
+    if (!takeFsMutex(pdMS_TO_TICKS(200))) {
     LOG_CAT(DBG_PUMPLOG, "[PumpLogs] aggregateDecadeLogsReport: FS busy, skipping\n");
     return 0;
   }
@@ -1545,7 +1519,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
 
   if (!LittleFS.exists(filename.c_str())) {
     LOG_CAT(DBG_FS, "Skipping missing file: %s\n", filename.c_str());
-    xSemaphoreGive(fileSystemMutex);
+    giveFsMutex();
     return 0;
   }
 
@@ -1553,7 +1527,7 @@ unsigned long aggregateDecadeLogsReport(int pumpIndex, DateTime currentTime) {
   if (!file || file.size() == 0) {
     if (file) file.close();
     LOG_CAT(DBG_FS, "Invalid or empty file: %s\n", filename.c_str());
-    xSemaphoreGive(fileSystemMutex);
+    giveFsMutex();
     return 0;
   }
 
@@ -1582,7 +1556,7 @@ vTaskDelay(1);
   }
 
   file.close();
-  xSemaphoreGive(fileSystemMutex);
+  giveFsMutex();
   return runtime;
 }
 
@@ -1612,7 +1586,7 @@ void setupRoutes() {
                 needToUpdatePumpRuntimes = true;
                 xTaskNotifyGive(thUpdatePumpRuntimes);
 
-                DynamicJsonDocument meta(256);
+                JsonDocument meta;
                 meta["requestedVersion"] = g_pumpRuntimeRequestedVersion;
                 meta["builtVersion"]     = g_pumpRuntimeBuiltVersion;
 
@@ -1701,9 +1675,6 @@ server.on("/download-log", HTTP_GET, [](AsyncWebServerRequest* request) {
         request->send(200, "application/json", json);
     });
 
-    setupAlarmRoutes();
-    
-    // Setup log data route
     setupLogDataRoute();
 }
 
@@ -1751,13 +1722,13 @@ void setupLogDataRoute() {
       return;
     }
 
-    DynamicJsonDocument doc(256);
+    JsonDocument doc;
     doc["runtime"] = runtime;
 
     String response;
     serializeJson(doc, response);
 
-    AsyncWebServerResponse* resp =
+    AsyncWebServerResponse* resp = 
       request->beginResponse(200, "application/json; charset=UTF-8", response);
     resp->addHeader("Cache-Control", "no-store");
     request->send(resp);
@@ -1836,4 +1807,3 @@ void WebServerManager_begin() {
     server.begin();
     Serial.println("[Web] AsyncWebServer started on port 80");
 }
-
