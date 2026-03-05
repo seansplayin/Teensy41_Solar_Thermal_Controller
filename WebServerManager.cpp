@@ -1,4 +1,5 @@
 // WebServerManager.cpp
+#define CORE_TEENSY 1  // Force the define
 #include "WebServerManager.h"
 #include <Arduino.h>
 #include "AlarmManager.h"
