@@ -113,7 +113,7 @@ void AlarmManager_set(AlarmCode code, AlarmSeverity sev, const char* fmt, ...) {
 
   if (xSemaphoreTake(s_alarmMutex, pdMS_TO_TICKS(100))) {
     AlarmState &st = s_states[c];
-    const bool wasActive = st.active;
+    
 
     if (!st.active || st.sev != sev || strncmp(st.detail, detail, sizeof(st.detail)) != 0) {
       if (!st.active) st.sinceEpoch = nowEpoch();

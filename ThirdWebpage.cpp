@@ -924,7 +924,7 @@ void setupThirdPageRoutes() {
       if (first < 0 || second <= first) continue;
       String time = line.substring(first + 1, second);
       float val = line.substring(second + 1).toFloat();
-      JsonObject obj = arr.createNestedObject();
+      JsonObject obj = arr.add<JsonObject>();
       obj["time"] = time;
       obj["value"] = val;
       lineCount++;
@@ -971,7 +971,7 @@ void setupThirdPageRoutes() {
 
     File entry = root.openNextFile();
     while (entry) {
-      JsonObject obj = arr.createNestedObject();
+      JsonObject obj = arr.add<JsonObject>();
 
       String full = String(entry.name());
       obj["name"] = full.substring(full.lastIndexOf('/') + 1);
