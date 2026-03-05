@@ -472,7 +472,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
     LOG_CAT(DBG_WEB, "WebSocket client disconnected (id=%u)\n", client ? client->id() : 0);
     
     // Log the client disconnect to the Alarm History
-    AlarmManager_event(WS_DISCONNECT, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
+    AlarmManager_event(ALM_INFO, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
     
     return;
   }
