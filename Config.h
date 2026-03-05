@@ -10,6 +10,7 @@
 #include <semphr.h>
 #include <LittleFS.h>
 
+
 // === ADD THESE THREE LINES ===
 extern LittleFS_QSPI FlashFS;     // matches FileSystemManager.h
 #define LittleFS FlashFS          // makes ALL your existing LittleFS. calls work instantly
@@ -152,5 +153,31 @@ extern volatile bool g_sendTemperatures;   // fixed type
 void AlarmManager_begin();
 void AlarmHistory_begin();
 void setupAlarmRoutes();
+
+
+
+
+// ==================== Globals ====================
+extern SemaphoreHandle_t pumpStateMutex;
+extern SemaphoreHandle_t temperatureMutex;
+extern SemaphoreHandle_t fileSystemMutex;
+
+extern bool needToUpdatePumpRuntimes;
+extern String g_tempWsPayload;
+extern volatile bool g_sendTemperatures;   // note: volatile if used in ISRs
+
+extern const int pumpPins[];               // or uint8_t if you prefer
+// =================================================
+
+// Define them here (or in a new Globals.cpp later)
+SemaphoreHandle_t pumpStateMutex = nullptr;
+SemaphoreHandle_t temperatureMutex = nullptr;
+SemaphoreHandle_t fileSystemMutex = nullptr;
+
+String g_tempWsPayload = "";
+volatile bool g_sendTemperatures = false;
+// std::mutex g_tempWsPayloadMutex;  // Uncomment if using std::mutex
+
+
 
 #endif

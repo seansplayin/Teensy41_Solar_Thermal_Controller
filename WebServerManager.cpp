@@ -21,6 +21,19 @@
 #include "TimeSync.h"   
 //#include "TarGZ.h"
 #include "DiagLog.h"
+#include <AsyncWebServer_Teensy41.h>
+#include <Teensy41_AsyncTCP.h>
+
+
+// ----- Forward declarations -----
+class AsyncWebSocketClient; 
+
+// === Forward declarations for helpers defined in Config.cpp / FileSystemManager.cpp ===
+bool deleteTemperatureLogsRecursive(const char* path);
+bool saveSystemConfigToFS();
+bool resetSystemConfigToDefaults();
+bool saveTimeConfigToFS();
+bool resetTimeConfigToDefaults();
 
 
 String getContentType(const String& path) {
@@ -472,7 +485,7 @@ void handleWebSocketEvent(AsyncWebSocket* server,
     LOG_CAT(DBG_WEB, "WebSocket client disconnected (id=%u)\n", client ? client->id() : 0);
     
     // Log the client disconnect to the Alarm History
-    AlarmManager_event(ALM_INFO, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
+    AlarmManager_event(ALM_NONE, ALM_INFO, "WS Client ID %u Disconnected", client ? client->id() : 0);
     
     return;
   }
