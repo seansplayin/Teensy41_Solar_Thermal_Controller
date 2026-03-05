@@ -179,7 +179,7 @@ extern SemaphoreHandle_t fileSystemMutex;
 
 
 // ====================== GLOBALS ======================
-extern bool needToUpdatePumpRuntimes;
+extern volatile bool needToUpdatePumpRuntimes;
 extern String g_tempWsPayload;
 extern volatile bool g_sendTemperatures;   // note: volatile if used in ISRs
 // ====================================================

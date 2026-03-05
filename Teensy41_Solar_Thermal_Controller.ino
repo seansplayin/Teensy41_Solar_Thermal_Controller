@@ -1,3 +1,4 @@
+#define CORE_TEENSY
 #include <Arduino.h>
 #include <LittleFS.h>
 LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
@@ -24,7 +25,7 @@ LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 #include "AlarmWebpage.h"
 #include "NetworkManager.h"
 #include "WebServerManager.h"
-#include "QNEthernet.h"  // ← ADD THIS for NetworkManager
+#include "QNEthernet.h" 
 
 using namespace qindesign::network;
 

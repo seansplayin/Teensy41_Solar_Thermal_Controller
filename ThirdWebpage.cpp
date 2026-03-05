@@ -912,7 +912,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    DynamicJsonDocument doc(8192);
+    JsonDocument doc;
     JsonArray arr = doc.to<JsonArray>();
     int lineCount = 0;
     while (f.available()) {
@@ -966,7 +966,7 @@ void setupThirdPageRoutes() {
       return;
     }
 
-    DynamicJsonDocument doc(8192);
+    JsonDocument doc;
     JsonArray arr = doc.to<JsonArray>();
 
     File entry = root.openNextFile();

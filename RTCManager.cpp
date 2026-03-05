@@ -44,13 +44,13 @@ DateTime getCurrentTime() { return CurrentTime; }
 DateTime getCurrentTimeAtomic() { return CurrentTime; }
 
 String getCurrentDateString() {
-    char dateStr[11];
+    char dateStr[12];
     sprintf(dateStr, "%04d-%02d-%02d", CurrentTime.year(), CurrentTime.month(), CurrentTime.day());
     return String(dateStr);
 }
 
 String getRtcTimeString() {
-    char buffer[20];
+    char buffer[21];
     snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d",
     CurrentTime.year(), CurrentTime.month(), CurrentTime.day(),
     CurrentTime.hour(), CurrentTime.minute(), CurrentTime.second());

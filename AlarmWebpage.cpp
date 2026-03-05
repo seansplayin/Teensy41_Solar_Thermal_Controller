@@ -65,7 +65,7 @@ static void handleDeleteBody(AsyncWebServerRequest* request,
   for (size_t i = 0; i < len; i++) body->concat((char)data[i]);
   if (index + len != total) return;
 
-  DynamicJsonDocument doc(4096);
+  JsonDocument doc;
   DeserializationError err = deserializeJson(doc, *body);
   delete body;
   request->_tempObject = nullptr;

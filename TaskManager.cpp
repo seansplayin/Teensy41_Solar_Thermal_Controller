@@ -43,7 +43,7 @@ SemaphoreHandle_t temperatureMutex = NULL;
 bool flagZeroLengthTime = false;
 bool flagZeroLengthPumpState = false;
 bool flagZeroLengthTemperatures = false;
-volatile bool needToUpdatePumpRuntimes = false;
+
 
 // Task Handles
 TaskHandle_t thPumpControl = NULL;
