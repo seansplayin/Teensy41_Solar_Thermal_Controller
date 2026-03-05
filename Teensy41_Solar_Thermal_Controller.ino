@@ -34,7 +34,7 @@ SemaphoreHandle_t pumpStateMutex     = nullptr;
 SemaphoreHandle_t temperatureMutex   = nullptr;
 SemaphoreHandle_t fileSystemMutex    = nullptr;
 
-bool needToUpdatePumpRuntimes = false;
+
 String g_tempWsPayload = "";
 volatile bool g_sendTemperatures = false;
 

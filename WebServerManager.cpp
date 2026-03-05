@@ -523,8 +523,8 @@ void handleWebSocketEvent(AsyncWebSocket* server,
 
 
 // Handle incoming WebSocket messages
-void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) { 
-        AwsFrameInfo* info = (AwsFrameInfo*)arg;
+void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
+    AwsFrameInfo* info = (AwsFrameInfo*)arg;
     if (info->opcode == WS_TEXT) {
         String message = wsBytesToString(data, len);
 
@@ -532,8 +532,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 
         if (message == "ping") {
             return;
-        }       
-                else if (message.startsWith("requestLogData")) {
+        } else if (message.startsWith("requestLogData")) {
             handleRequestLogData(message);
         } else if (message.startsWith("setPumpMode:")) {
             handleSetPumpMode(message);
@@ -542,161 +541,148 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
         } else if (message.equals("setAllPumps:off")) {
             setAllPumpsMode(PUMP_OFF);
         } else if (message == "deleteTemperatureLogs") {
-               // dangerous: only use if you intentionally want to delete all logs
-                  bool ok = deleteTemperatureLogsRecursive("/Temperature_Logs");
-                   ws.textAll(String("DeleteTempLogsResult:") + (ok ? "OK" : "FAIL"));
-                    }                 else if (message.startsWith("setConfig:")) {
-                 String payload = message.substring(strlen("setConfig:"));
-                 // Format: setConfig:key=val,key=val,... (values may contain commas)
-                 int start = 0;
+            // dangerous: only use if you intentionally want to delete all logs
+            bool ok = deleteTemperatureLogsRecursive("/Temperature_Logs");
+            ws.textAll(String("DeleteTempLogsResult:") + (ok ? "OK" : "FAIL"));
+        } else if (message.startsWith("setConfig:")) {
+            String payload = message.substring(strlen("setConfig:"));
+            // Format: setConfig:key=val,key=val,... (values may contain commas)
+            size_t start = 0;  // Changed to size_t to fix signed/unsigned comparison warning
 
-                 while (start < payload.length()) {
+            while (start < payload.length()) {
+                String pair = nextConfigPairMerged(payload, start);
+                pair.trim();
+                if (pair.length() == 0) continue;
 
-                   String pair = nextConfigPairMerged(payload, start);
-                   pair.trim();
-                   if (pair.length() == 0) continue;
+                int eq = pair.indexOf('=');
+                if (eq <= 0) continue;
 
-                   int eq = pair.indexOf('=');
-                   if (eq <= 0) continue;
+                String key = pair.substring(0, eq);
+                String val = pair.substring(eq + 1);
+                key.trim();
+                val.trim();
 
-                   String key = pair.substring(0, eq);
-                   String val = pair.substring(eq + 1);
-                   key.trim();
-                   val.trim();
+                float f = val.toFloat();
+                long i = val.toInt();
 
-                   float f = val.toFloat();
-                   long  i = val.toInt();
-
-                   if (key == "panelTminimum") {
-                     g_config.panelTminimumValue = f;
-                   } else if (key == "PanelOnDifferential") {
-                     g_config.panelOnDifferential = f;
-                   } else if (key == "PanelLowDifferential") {
-                     g_config.panelLowDifferential = f;
-                   } else if (key == "PanelOffDifferential") {
-                     g_config.panelOffDifferential = f;
-                   } else if (key == "Boiler_Circ_On") {
-                     g_config.boilerCircOn = f;
-                   } else if (key == "Boiler_Circ_Off") {
-                     g_config.boilerCircOff = f;
-                   } else if (key == "StorageHeatingLimit") {
-                     g_config.storageHeatingLimit = f;
-                   } else if (key == "Circ_Pump_On") {
-                     g_config.circPumpOn = f;
-                   } else if (key == "Circ_Pump_Off") {
-                     g_config.circPumpOff = f;
-                   } else if (key == "Heat_Tape_On") {
-                     g_config.heatTapeOn = f;
-                   } else if (key == "Heat_Tape_Off") {
-                     g_config.heatTapeOff = f;
-
-                   } else if (key == "collectorFreezeTempF") {
-                     g_config.collectorFreezeTempF = clampF(f, 20.0f, 80.0f);
-                   } else if (key == "collectorFreezeConfirmMin") {
-                     g_config.collectorFreezeConfirmMin = clampU16(i, 1, 120);
-                   } else if (key == "collectorFreezeRunMin") {
-                     g_config.collectorFreezeRunMin = clampU16(i, 1, 120);
-
-                   } else if (key == "lineFreezeTempF") {
-                     g_config.lineFreezeTempF = clampF(f, 20.0f, 80.0f);
-                   } else if (key == "lineFreezeConfirmMin") {
-                     g_config.lineFreezeConfirmMin = clampU16(i, 1, 120);
-                   } else if (key == "lineFreezeRunMin") {
-                     g_config.lineFreezeRunMin = clampU16(i, 1, 120);
-
-                   } else if (key == "collectorFreezeSensors") {
-                     parseU8List_PipeOrComma(val, g_config.collectorFreezeSensors,
-                                             sizeof(g_config.collectorFreezeSensors));
-                   } else if (key == "lineFreezeSensors") {
-                     parseU8List_PipeOrComma(val, g_config.lineFreezeSensors,
-                                             sizeof(g_config.lineFreezeSensors));
-                   }
-                 }
-
-                 // Persist to LittleFS
-                                               if (!saveSystemConfigToFS()) {
-                              LOG_ERR("[Config] ERROR while saving system_config.json\n");
-                              ws.textAll("ConfigSave:FAIL");
-                               } else 
-                              {
-                              LOG_CAT(DBG_CONFIG, "[Config] system_config.json saved from WebUI\n");
-                              ws.textAll("ConfigSave:OK");
-
-                   // Re-send configuration so all clients update display
-                   g_sendConfig = true;
-                 }
-                 }   
-                    else if (message == "resetConfig") {
-
-                LOG_CAT(DBG_CONFIG, "[WS] Reset SystemConfig to defaults requested\n");
-
-
-                bool ok = resetSystemConfigToDefaults();  // helper from Config.cpp
-
-                if (ok) {
-                    ws.textAll("ConfigReset:OK");
-                    // Push fresh values so browsers update all spans/inputs + currentConfig cache
-                    g_sendConfig = true;
-                } else {
-                    ws.textAll("ConfigReset:FAIL");
-                }
-                        }   else if (message.startsWith("setTimeConfig:")) {
-                 String payload = message.substring(strlen("setTimeConfig:"));
-                 // Format: setTimeConfig:key=val,key=val,...
-                 int start = 0;
-
-                 while (start < payload.length()) {
-                   String pair = nextConfigPairMerged(payload, start);
-                   pair.trim();
-                   if (pair.length() == 0) continue;
-
-                   int eq = pair.indexOf('=');
-                   if (eq <= 0) continue;
-
-                   String key = pair.substring(0, eq);
-                   String val = pair.substring(eq + 1);
-                   key.trim();
-                   val.trim();
-
-                   if (key == "timeZoneId") {
-                     // e.g. "America/Los_Angeles" or your own IDs
-                     g_timeConfig.timeZoneId = val;
-                   } else if (key == "dstEnabled") {
-                     // accept 0/1, true/false
-                     val.toLowerCase();
-                     g_timeConfig.dstEnabled = (val == "1" || val == "true" || val == "yes" || val == "on");
-                   }
-                 }
-
-                                 if (!saveTimeConfigToFS()) {
-                    LOG_ERR("[TimeConfig] ERROR while saving time_config.json\n");
-                    ws.textAll("TimeConfigSave:FAIL");
-                } else {
-                    LOG_CAT(DBG_CONFIG, "[TimeConfig] time_config.json saved from WebUI\n");
-                    ws.textAll("TimeConfigSave:OK");
-
-                   // Re-send so all clients update display
-                   g_sendTimeConfig = true;
-                   // 🔁 Re-run NTP so RTC + timestamps immediately pick up the new TZ
-                   requestImmediateNtpResync();
-                 }
-            }
-            
-                else if (message == "resetTimeConfig") {
-
-                LOG_CAT(DBG_CONFIG, "[WS] Reset TimeConfig to defaults requested\n");
-
-
-                bool ok = resetTimeConfigToDefaults();
-
-                if (ok) {
-                    ws.textAll("TimeConfigReset:OK");
-                    g_sendTimeConfig = true;
-                    
-                } else {
-                    ws.textAll("TimeConfigReset:FAIL");
+                if (key == "panelTminimum") {
+                    g_config.panelTminimumValue = f;
+                } else if (key == "PanelOnDifferential") {
+                    g_config.panelOnDifferential = f;
+                } else if (key == "PanelLowDifferential") {
+                    g_config.panelLowDifferential = f;
+                } else if (key == "PanelOffDifferential") {
+                    g_config.panelOffDifferential = f;
+                } else if (key == "Boiler_Circ_On") {
+                    g_config.boilerCircOn = f;
+                } else if (key == "Boiler_Circ_Off") {
+                    g_config.boilerCircOff = f;
+                } else if (key == "StorageHeatingLimit") {
+                    g_config.storageHeatingLimit = f;
+                } else if (key == "Circ_Pump_On") {
+                    g_config.circPumpOn = f;
+                } else if (key == "Circ_Pump_Off") {
+                    g_config.circPumpOff = f;
+                } else if (key == "Heat_Tape_On") {
+                    g_config.heatTapeOn = f;
+                } else if (key == "Heat_Tape_Off") {
+                    g_config.heatTapeOff = f;
+                } else if (key == "collectorFreezeTempF") {
+                    g_config.collectorFreezeTempF = clampF(f, 20.0f, 80.0f);
+                } else if (key == "collectorFreezeConfirmMin") {
+                    g_config.collectorFreezeConfirmMin = clampU16(i, 1, 120);
+                } else if (key == "collectorFreezeRunMin") {
+                    g_config.collectorFreezeRunMin = clampU16(i, 1, 120);
+                } else if (key == "lineFreezeTempF") {
+                    g_config.lineFreezeTempF = clampF(f, 20.0f, 80.0f);
+                } else if (key == "lineFreezeConfirmMin") {
+                    g_config.lineFreezeConfirmMin = clampU16(i, 1, 120);
+                } else if (key == "lineFreezeRunMin") {
+                    g_config.lineFreezeRunMin = clampU16(i, 1, 120);
+                } else if (key == "collectorFreezeSensors") {
+                    parseU8List_PipeOrComma(val, g_config.collectorFreezeSensors,
+                                            sizeof(g_config.collectorFreezeSensors));
+                } else if (key == "lineFreezeSensors") {
+                    parseU8List_PipeOrComma(val, g_config.lineFreezeSensors,
+                                            sizeof(g_config.lineFreezeSensors));
                 }
             }
+
+            // Persist to LittleFS
+            if (!saveSystemConfigToFS()) {
+                LOG_ERR("[Config] ERROR while saving system_config.json\n");
+                ws.textAll("ConfigSave:FAIL");
+            } else {
+                LOG_CAT(DBG_CONFIG, "[Config] system_config.json saved from WebUI\n");
+                ws.textAll("ConfigSave:OK");
+
+                // Re-send configuration so all clients update display
+                g_sendConfig = true;
+            }
+        } else if (message == "resetConfig") {
+            LOG_CAT(DBG_CONFIG, "[WS] Reset SystemConfig to defaults requested\n");
+
+            bool ok = resetSystemConfigToDefaults();  // helper from Config.cpp
+
+            if (ok) {
+                ws.textAll("ConfigReset:OK");
+                // Push fresh values so browsers update all spans/inputs + currentConfig cache
+                g_sendConfig = true;
+            } else {
+                ws.textAll("ConfigReset:FAIL");
+            }
+        } else if (message.startsWith("setTimeConfig:")) {
+            String payload = message.substring(strlen("setTimeConfig:"));
+            // Format: setTimeConfig:key=val,key=val,...
+            size_t start = 0;  // Changed to size_t to fix signed/unsigned comparison warning
+
+            while (start < payload.length()) {
+                String pair = nextConfigPairMerged(payload, start);
+                pair.trim();
+                if (pair.length() == 0) continue;
+
+                int eq = pair.indexOf('=');
+                if (eq <= 0) continue;
+
+                String key = pair.substring(0, eq);
+                String val = pair.substring(eq + 1);
+                key.trim();
+                val.trim();
+
+                if (key == "timeZoneId") {
+                    // e.g. "America/Los_Angeles" or your own IDs
+                    g_timeConfig.timeZoneId = val;
+                } else if (key == "dstEnabled") {
+                    // accept 0/1, true/false
+                    val.toLowerCase();
+                    g_timeConfig.dstEnabled = (val == "1" || val == "true" || val == "yes" || val == "on");
+                }
+            }
+
+            if (!saveTimeConfigToFS()) {
+                LOG_ERR("[TimeConfig] ERROR while saving time_config.json\n");
+                ws.textAll("TimeConfigSave:FAIL");
+            } else {
+                LOG_CAT(DBG_CONFIG, "[TimeConfig] time_config.json saved from WebUI\n");
+                ws.textAll("TimeConfigSave:OK");
+
+                // Re-send so all clients update display
+                g_sendTimeConfig = true;
+                // 🔁 Re-run NTP so RTC + timestamps immediately pick up the new TZ
+                requestImmediateNtpResync();
+            }
+        } else if (message == "resetTimeConfig") {
+            LOG_CAT(DBG_CONFIG, "[WS] Reset TimeConfig to defaults requested\n");
+
+            bool ok = resetTimeConfigToDefaults();
+
+            if (ok) {
+                ws.textAll("TimeConfigReset:OK");
+                g_sendTimeConfig = true;
+            } else {
+                ws.textAll("TimeConfigReset:FAIL");
+            }
+        }
     }
 }
 
