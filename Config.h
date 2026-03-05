@@ -47,28 +47,42 @@ extern SemaphoreHandle_t temperatureMutex;
 extern SemaphoreHandle_t fileSystemMutex;
 
 // ====================== TEENSY 4.1 PIN MAP ======================
-const int pinSDA = 18;
-const int pinSCL = 19;
-const int FURNACE_HEATING_PIN = 22;
-const int DHW_HEATING_PIN     = 23;
-const int ONE_WIRE_BUS_1      = 2;
-const int ONE_WIRE_BUS_2      = 3;
+constexpr int pinSDA = 18;
+constexpr int pinSCL = 19;
+constexpr int FURNACE_HEATING_PIN = 22;
+constexpr int DHW_HEATING_PIN     = 23;
+constexpr int ONE_WIRE_BUS_1      = 2;
+constexpr int ONE_WIRE_BUS_2      = 3;
 
-#define MAX31865_CS_PIN   10
-#define MAX31865_DO_PIN   12
-#define MAX31865_DI_PIN   11
-#define MAX31865_CLK_PIN  13
+constexpr int MAX31865_CS_PIN   = 10;
+constexpr int MAX31865_DO_PIN   = 12;
+constexpr int MAX31865_DI_PIN   = 11;
+constexpr int MAX31865_CLK_PIN  = 13;
 
-const int PANEL_LEAD_PUMP_RELAY = 4;
-const int PANEL_LAG_PUMP_RELAY  = 5;
-const int HEAT_TAPE_RELAY       = 6;
-const int CIRC_PUMP_RELAY       = 7;
-const int DHW_PUMP_RELAY        = 8;
-const int STORAGE_HEAT_RELAY    = 9;
-const int BOILER_CIRC_RELAY     = 24;
-const int RECIRC_VALVE_RELAY    = 25;
-const int Pump_9_Unused_Relay   = 28;
-const int Pump_10_Unused_Relay  = 29;
+constexpr int PANEL_LEAD_PUMP_RELAY = 4;
+constexpr int PANEL_LAG_PUMP_RELAY  = 5;
+constexpr int HEAT_TAPE_RELAY       = 6;
+constexpr int CIRC_PUMP_RELAY       = 7;
+constexpr int DHW_PUMP_RELAY        = 8;
+constexpr int STORAGE_HEAT_RELAY    = 9;
+constexpr int BOILER_CIRC_RELAY     = 24;
+constexpr int RECIRC_VALVE_RELAY    = 25;
+constexpr int Pump_9_Unused_Relay   = 28;
+constexpr int Pump_10_Unused_Relay  = 29;
+
+// Pump pin array (used by PumpManager)
+constexpr int pumpPins[10] = {
+    PANEL_LEAD_PUMP_RELAY,   // 0
+    PANEL_LAG_PUMP_RELAY,    // 1
+    HEAT_TAPE_RELAY,         // 2
+    CIRC_PUMP_RELAY,         // 3
+    DHW_PUMP_RELAY,          // 4
+    STORAGE_HEAT_RELAY,      // 5
+    BOILER_CIRC_RELAY,       // 6
+    RECIRC_VALVE_RELAY,      // 7
+    Pump_9_Unused_Relay,     // 8
+    Pump_10_Unused_Relay     // 9
+};
 
 #define PUMP_OFF  0
 #define PUMP_ON   1
@@ -77,7 +91,7 @@ const int Pump_10_Unused_Relay  = 29;
 extern int pumpModes[10];
 extern int pumpStates[10];
 const int numPumps = 10;
-extern const int pumpPins[10];
+
 
 // ====================== PARAMETERS ======================
 inline constexpr float DEFAULT_PanelOnDifferential      = 30.0f;
@@ -156,28 +170,19 @@ void setupAlarmRoutes();
 
 
 
-
-// ==================== Globals ====================
+// ==================== Global Mutex ====================
 extern SemaphoreHandle_t pumpStateMutex;
 extern SemaphoreHandle_t temperatureMutex;
 extern SemaphoreHandle_t fileSystemMutex;
 
+// =================================================
+
+
+// ====================== GLOBALS ======================
 extern bool needToUpdatePumpRuntimes;
 extern String g_tempWsPayload;
 extern volatile bool g_sendTemperatures;   // note: volatile if used in ISRs
-
-extern const int pumpPins[];               // or uint8_t if you prefer
-// =================================================
-
-// Define them here (or in a new Globals.cpp later)
-SemaphoreHandle_t pumpStateMutex = nullptr;
-SemaphoreHandle_t temperatureMutex = nullptr;
-SemaphoreHandle_t fileSystemMutex = nullptr;
-
-String g_tempWsPayload = "";
-volatile bool g_sendTemperatures = false;
-// std::mutex g_tempWsPayloadMutex;  // Uncomment if using std::mutex
-
+// ====================================================
 
 
 #endif

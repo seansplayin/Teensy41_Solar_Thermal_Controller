@@ -9,9 +9,13 @@
 #include "FileSystemManager.h"
 #include "AlarmManager.h"
 #include "DiagLog.h"
+#include "Config.h"
 
 // ✅ This line fixes HIGH, LOW, OUTPUT, INPUT_PULLUP errors
 using namespace arduino; 
+
+// pumpPins defined in Config.h
+extern const int pumpPins[];  
 
 bool previousDHWCallStatus = false;
 bool previousHeatingCallStatus = false;
