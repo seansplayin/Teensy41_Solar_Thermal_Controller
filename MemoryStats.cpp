@@ -2,7 +2,7 @@
 #include "Config.h"
 #include "DiagLog.h"
 #include <malloc.h> // Standard C malloc info
-#include <Arduino.h>
+#include <Arduino.h> 
 
 extern "C" struct mallinfo mallinfo(void);
 

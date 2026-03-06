@@ -4,7 +4,7 @@
 #include "Config.h"
 #include "FileSystemManager.h"
 #include "DiagLog.h"
-
+#include <AsyncWebServer_Teensy41.h>  // For AsyncWebServerRequest, HTTP_GET
 
 #define VERSION_INFO " -AsyncWebServer123_ESP_V5_IDE_2.3.6- "
 

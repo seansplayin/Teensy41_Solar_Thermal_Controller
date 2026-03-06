@@ -11,6 +11,8 @@
 #include "DiagLog.h"
 #include "Config.h"
 #include <Arduino.h>
+#include <RTClib.h>
+#include "DS18B20.h"
 
 // ✅ This line fixes HIGH, LOW, OUTPUT, INPUT_PULLUP errors
 using namespace arduino; 

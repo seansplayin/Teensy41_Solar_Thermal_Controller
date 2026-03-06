@@ -8,7 +8,7 @@
 #include <Wire.h> // ✅ Required for Wire.begin
 #include "AlarmManager.h"
 #include "DiagLog.h"
-
+#include <Arduino.h>
 
 RTC_DS3231 rtc;
 DateTime CurrentTime; 

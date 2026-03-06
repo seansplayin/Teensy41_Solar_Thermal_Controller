@@ -7,7 +7,9 @@
 #include "FileSystemManager.h"
 #include "PumpManager.h"
 #include "DiagLog.h"
-
+#include <Arduino.h>
+#include <RTClib.h>
+#include <AsyncWebServer_Teensy41.h>
 
 extern AsyncWebServer server;  // declared in WebServerManager.cpp
 

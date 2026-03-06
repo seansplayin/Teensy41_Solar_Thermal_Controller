@@ -4,6 +4,8 @@
 #include "AlarmHistory.h"
 #include <ArduinoJson.h>
 #include "DiagLog.h"
+#include <AsyncWebServer_Teensy41.h>
+
 
 // The big HTML page (unchanged)
 static const char alarmLogHtml[] PROGMEM = R"rawliteral(

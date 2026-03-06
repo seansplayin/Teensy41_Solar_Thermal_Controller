@@ -11,6 +11,8 @@
 #include "DiagLog.h"
 #include <RTClib.h>
 #include "RTCManager.h"   // for extern DateTime CurrentTime
+#include "DS18B20.h"
+
 
 extern DateTime CurrentTime;   
 

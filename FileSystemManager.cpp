@@ -4,6 +4,8 @@
 #include <LittleFS.h>
 #include <arduino_freertos.h>
 #include "DiagLog.h"
+#include <Arduino.h>
+
 
 // Instantiate
 LittleFS_QSPI FlashFS;
