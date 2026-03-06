@@ -29,11 +29,6 @@ LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 
 using namespace qindesign::network;
 
-// === Global definitions (only here!) ===
-SemaphoreHandle_t pumpStateMutex     = nullptr;
-SemaphoreHandle_t temperatureMutex   = nullptr;
-SemaphoreHandle_t fileSystemMutex    = nullptr;
-
 
 String g_tempWsPayload = "";
 volatile bool g_sendTemperatures = false;
