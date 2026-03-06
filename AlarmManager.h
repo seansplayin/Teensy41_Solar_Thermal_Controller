@@ -3,8 +3,6 @@
 #define ALARMMANAGER_H
 
 #include <Arduino.h>
-#include <stdint.h>
-#include <stddef.h>
 
 // Severity
 enum AlarmSeverity {
@@ -20,7 +18,7 @@ enum AlarmAction {
   ALM_ACT_EVENT = 2   // one-off event (no state)
 };
 
-// Codes (keep <= 32 unless you expand ALM_CODE_MAX in AlarmManager.cpp)
+// Codes (keep <= ALM_CODE_MAX)
 enum AlarmCode {
   ALM_NONE = 0,
 
@@ -47,6 +45,9 @@ enum AlarmCode {
   ALM_SENSOR_FAULT,
   ALM_PT1000_FAULT
 };
+
+// Maximum alarm code value (adjust if adding more codes)
+const uint16_t ALM_CODE_MAX = 32;
 
 // Active state
 struct AlarmState {

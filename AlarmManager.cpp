@@ -1,3 +1,4 @@
+// AlarmManager.cpp
 #include "AlarmManager.h"
 #include <arduino_freertos.h>
 #include <semphr.h>
@@ -9,7 +10,6 @@
 
 static SemaphoreHandle_t s_alarmMutex = nullptr;
 
-static const uint16_t ALM_CODE_MAX = 32;
 static AlarmState s_states[ALM_CODE_MAX + 1];
 
 static const size_t ALM_EVENT_CAP = 80;
@@ -62,7 +62,12 @@ static void pushEvent(AlarmCode code, AlarmSeverity sev, AlarmAction action, con
 
 void AlarmManager_begin() {
   if (!s_alarmMutex) s_alarmMutex = xSemaphoreCreateMutex();
-  memset(s_states, 0, sizeof(s_states));
+
+  // Initialize states with value-initialization to avoid memset warning
+  for (size_t i = 0; i <= ALM_CODE_MAX; i++) {
+    s_states[i] = AlarmState{};
+  }
+
   s_evtHead = 0;
   s_evtWrapped = false;
 }
