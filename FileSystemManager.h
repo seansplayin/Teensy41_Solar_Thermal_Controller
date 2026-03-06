@@ -1,7 +1,7 @@
 #ifndef FILE_SYSTEM_MANAGER_H
 #define FILE_SYSTEM_MANAGER_H
 
-#include "Config.h" // Pulls in LittleFS before FreeRTOS
+
 
 // ✅ Declare the specific Teensy Filesystem Object
 extern LittleFS_QSPI FlashFS;

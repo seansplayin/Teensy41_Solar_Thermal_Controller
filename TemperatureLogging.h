@@ -1,7 +1,7 @@
 #ifndef TEMPERATURELOGGING_H
 #define TEMPERATURELOGGING_H
 
-#include <Arduino.h>
+
 
 // Set up directories and internal state for temperature logging
 void setupTemperatureLogging();

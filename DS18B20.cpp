@@ -6,8 +6,7 @@
 #include "AlarmManager.h"
 #include <arduino_freertos.h>
 
-// Remove watchdog header
-// #include <esp_task_wdt.h>
+
 
 #define NUM_SENSORS 13
 

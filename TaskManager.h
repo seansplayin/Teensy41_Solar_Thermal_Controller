@@ -1,7 +1,6 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
-#include "Config.h"
-#include <arduino_freertos.h> // Fixed include
+
 
 String getContentType(const String& path);
 

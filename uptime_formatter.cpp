@@ -1,4 +1,5 @@
 #include "uptime_formatter.h"
+#include <Arduino.h>
 
 String UptimeFormatter::getUptime() {
   unsigned long up = millis();

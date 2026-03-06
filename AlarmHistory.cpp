@@ -4,6 +4,10 @@
 #include <ArduinoJson.h>
 #include <arduino_freertos.h>
 #include "DiagLog.h"
+#include <Arduino.h>
+#include <stddef.h>  // for size_t
+#include <stdint.h>
+#include "AlarmManager.h"
 
 
 extern bool g_fileSystemReady;

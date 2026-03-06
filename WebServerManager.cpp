@@ -1,6 +1,5 @@
 // WebServerManager.cpp
-#define CORE_TEENSY 1  // Force the define
-
+#define CORE_TEENSY  // Add this here to fix the library error across all 
 #include "WebServerManager.h"
 #include <Arduino.h>
 #include "AlarmManager.h"
@@ -24,6 +23,8 @@
 #include "DiagLog.h"
 #include <AsyncWebServer_Teensy41.h>
 #include <Teensy41_AsyncTCP.h>
+
+
 
 // ----- Forward declarations -----
 class AsyncWebSocketClient; 
@@ -124,17 +125,17 @@ static int findNextListSep(const String& s, int start) {
 // Returns the next "key=value" pair starting at 'start'.
 // If a value contains commas, this merges tokens until the next token contains '='.
 // Updates 'start' to the beginning of the next pair (or payload.length()).
-static String nextConfigPairMerged(const String& payload, int& start) {
-  const int n = payload.length();
+static String nextConfigPairMerged(const String& payload, size_t& start) {
+  const size_t n = payload.length();
   // skip leading commas/spaces
   while (start < n && (payload[start] == ',' || payload[start] == ' ')) start++;
 
   String pair;
-  int i = start;
+  size_t i = start;
 
   while (i < n) {
-    int comma = payload.indexOf(',', i);
-    int end   = (comma == -1) ? n : comma;
+    size_t comma = payload.indexOf(',', i);
+    size_t end   = (comma == (size_t)-1) ? n : comma;
 
     String tok = payload.substring(i, end);
     tok.trim();
@@ -154,7 +155,7 @@ static String nextConfigPairMerged(const String& payload, int& start) {
       }
     }
 
-    if (comma == -1) break;
+    if (comma == (size_t)-1) break;
     i = comma + 1;
   }
 
@@ -549,7 +550,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
                     }                 else if (message.startsWith("setConfig:")) {
                  String payload = message.substring(strlen("setConfig:"));
                  // Format: setConfig:key=val,key=val,... (values may contain commas)
-                 int start = 0;
+                 size_t start = 0;
 
                  while (start < payload.length()) {
 
@@ -644,7 +645,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
                         }   else if (message.startsWith("setTimeConfig:")) {
                  String payload = message.substring(strlen("setTimeConfig:"));
                  // Format: setTimeConfig:key=val,key=val,...
-                 int start = 0;
+                 size_t start = 0;
 
                  while (start < payload.length()) {
                    String pair = nextConfigPairMerged(payload, start);

@@ -1,6 +1,6 @@
 #ifndef TIMESYNC_H
 #define TIMESYNC_H
-#include "Config.h"
+
 void setupTimeSync();
 void initNTP();
 void tryNtpUpdate();

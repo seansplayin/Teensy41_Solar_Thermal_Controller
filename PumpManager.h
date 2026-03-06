@@ -1,7 +1,6 @@
 #ifndef PUMPMANAGER_H
 #define PUMPMANAGER_H
-#include "Config.h"
-#include <Arduino.h>
+
 
 const int NUM_PUMPS = 10;
 

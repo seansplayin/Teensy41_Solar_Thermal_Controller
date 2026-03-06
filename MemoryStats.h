@@ -1,6 +1,6 @@
 #ifndef MEMORYSTATS_H
 #define MEMORYSTATS_H
-#include <Arduino.h>
+
 
 String getHeapInternalString();
 String getPsramString();

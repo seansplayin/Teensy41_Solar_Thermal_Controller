@@ -8,6 +8,8 @@
 #include "TaskManager.h"
 #include "DiagLog.h"
 #include <arduino_freertos.h>
+#include <RTClib.h>       
+#include <queue.h> 
 
 extern DateTime CurrentTime;
 extern RTC_DS3231 rtc;
@@ -15,6 +17,13 @@ volatile bool Elapsed_Day = false;
 extern void runHourlyHealthCheck();
 
 extern SemaphoreHandle_t fileSystemMutex;
+
+// ────── LogEvent definition ─────────
+struct LogEvent {
+  uint8_t  pumpIndex;   // 0–9
+  bool     isStart;     // true=START, false=STOP
+  DateTime ts;          // timestamp
+};
 
 // --- MEMORY MONITORING (Teensy Version) ---
 static void memMark(const char* tag) {

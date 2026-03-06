@@ -8,8 +8,13 @@
 #include "DiagLog.h"
 #include <arduino_freertos.h>
 
-// Mutex for temperature data access
-extern SemaphoreHandle_t temperatureMutex;
+
+// Define the mutex handles
+
+SemaphoreHandle_t temperatureMutex = NULL;
+// fileSystemMutex is defined in FileSystemManager.cpp
+
+
 
 // Remove Ticker
 // Ticker temperatureTicker; 

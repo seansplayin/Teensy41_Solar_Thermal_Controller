@@ -10,9 +10,13 @@
 #include "AlarmManager.h"
 #include "DiagLog.h"
 #include "Config.h"
+#include <Arduino.h>
 
 // ✅ This line fixes HIGH, LOW, OUTPUT, INPUT_PULLUP errors
 using namespace arduino; 
+
+// Define the mutex handles
+SemaphoreHandle_t pumpStateMutex = NULL;
 
 // pumpPins defined in Config.h
 extern const int pumpPins[];  

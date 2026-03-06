@@ -28,16 +28,13 @@
 //#include "TarGZ.h"
 #include "DiagLog.h"
 
-// Remove ESP specific headers
-// #include <esp_task_wdt.h>
-// #include "esp_timer.h"
 
 QueueHandle_t logQueue = nullptr;
 
-// Define the mutex handles
-SemaphoreHandle_t pumpStateMutex = NULL;
-SemaphoreHandle_t temperatureMutex = NULL;
-// fileSystemMutex is defined in FileSystemManager.cpp
+// Mutex for temperature data access
+extern SemaphoreHandle_t fileSystemMutex;
+extern SemaphoreHandle_t temperatureMutex;
+extern SemaphoreHandle_t pumpStateMutex;
 
 // Flag variables
 bool flagZeroLengthTime = false;
