@@ -1,18 +1,18 @@
+#include <arduino_freertos.h>
 #include "FileSystemManager.h"
 #include <Arduino.h>
+
 #include "Logging.h" 
 #include "Config.h"
-#include <LittleFS.h>
-#include <arduino_freertos.h>
 #include "DiagLog.h"
 
 
 
-// Instantiate
+// Definitions
+SemaphoreHandle_t fileSystemMutex = nullptr;
 LittleFS_QSPI FlashFS;
 
-SemaphoreHandle_t fileSystemMutex = NULL;
-bool g_fileSystemReady = false; 
+bool g_fileSystemReady = false;
 
 void initializeFileSystem() {
     if (!fileSystemMutex) fileSystemMutex = xSemaphoreCreateMutex();

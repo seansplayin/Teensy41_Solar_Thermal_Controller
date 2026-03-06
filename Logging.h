@@ -1,5 +1,7 @@
 #ifndef LOGGING_H
 #define LOGGING_H
+#include <RTClib.h>   
+#include <queue.h> 
 
 
 void logPumpEvent(int pumpIndex, const String& event);

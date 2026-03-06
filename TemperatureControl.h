@@ -1,5 +1,6 @@
 #ifndef TEMPERATURECONTROL_H
 #define TEMPERATURECONTROL_H
+#include "DS18B20.h"
 
 
 // Existing temperature variables

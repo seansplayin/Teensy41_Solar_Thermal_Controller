@@ -1,3 +1,4 @@
+#include <arduino_freertos.h>
 #include "TemperatureControl.h"
 #include "Logging.h"
 #include "WebServerManager.h"
@@ -6,7 +7,6 @@
 #include "Max31865-PT1000.h"
 #include "DS18B20.h"
 #include "DiagLog.h"
-#include <arduino_freertos.h>
 #include <AsyncWebServer_Teensy41.h>
 
 

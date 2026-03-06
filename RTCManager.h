@@ -1,6 +1,7 @@
 #ifndef RTCMANAGER_H
 #define RTCMANAGER_H
-
+#include <Arduino.h>
+#include <RTClib.h>
 
 extern DateTime CurrentTime; // Declaration for global access
 void setupRTC();

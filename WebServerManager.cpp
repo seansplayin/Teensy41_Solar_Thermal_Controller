@@ -1,5 +1,6 @@
 // WebServerManager.cpp
 #define CORE_TEENSY  // Add this here to fix the library error across all 
+#include <arduino_freertos.h>
 #include "WebServerManager.h"
 #include <Arduino.h>
 #include "AlarmManager.h"

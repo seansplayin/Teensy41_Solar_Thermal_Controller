@@ -11,8 +11,8 @@
 #include <LittleFS.h>
 
 
-// === ADD THESE THREE LINES ===
-extern LittleFS_QSPI FlashFS;     // matches FileSystemManager.h
+
+
 #define LittleFS FlashFS          // makes ALL your existing LittleFS. calls work instantly
 // =============================
 
@@ -44,7 +44,7 @@ extern LittleFS_QSPI FlashFS;     // matches FileSystemManager.h
 // ====================== HANDLES ======================
 extern SemaphoreHandle_t pumpStateMutex;
 extern SemaphoreHandle_t temperatureMutex;
-extern SemaphoreHandle_t fileSystemMutex;
+
 
 // ====================== TEENSY 4.1 PIN MAP ======================
 constexpr int pinSDA = 18;
@@ -173,7 +173,7 @@ void setupAlarmRoutes();
 // ==================== Global Mutex ====================
 extern SemaphoreHandle_t pumpStateMutex;
 extern SemaphoreHandle_t temperatureMutex;
-extern SemaphoreHandle_t fileSystemMutex;
+
 
 // =================================================
 

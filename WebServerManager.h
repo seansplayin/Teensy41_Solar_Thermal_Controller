@@ -1,6 +1,8 @@
 #ifndef WEBSERVER_MANAGER_H
 #define WEBSERVER_MANAGER_H
 #include <Arduino.h>
+#include <AsyncWebServer_Teensy41.h>
+
 
 extern AsyncWebServer server;
 extern AsyncWebSocket ws;

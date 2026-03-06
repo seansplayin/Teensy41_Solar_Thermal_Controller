@@ -1,3 +1,4 @@
+#include <arduino_freertos.h>
 #include "Logging.h"
 #include "TimeSync.h"
 #include "RTCManager.h"
@@ -7,7 +8,6 @@
 #include "FileSystemManager.h"
 #include "TaskManager.h"
 #include "DiagLog.h"
-#include <arduino_freertos.h>
 #include <RTClib.h>       
 #include <queue.h> 
 
