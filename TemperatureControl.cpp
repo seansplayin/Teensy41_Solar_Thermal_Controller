@@ -7,6 +7,7 @@
 #include "DS18B20.h"
 #include "DiagLog.h"
 #include <arduino_freertos.h>
+#include <AsyncWebServer_Teensy41.h>
 
 
 // Define the mutex handles

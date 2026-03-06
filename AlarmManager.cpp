@@ -7,6 +7,7 @@
 #include <time.h>
 #include "DiagLog.h"
 #include "WebServerManager.h"
+#include <AsyncWebServer_Teensy41.h>
 
 static SemaphoreHandle_t s_alarmMutex = nullptr;
 

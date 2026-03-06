@@ -1,6 +1,6 @@
 #ifndef DS18B20_H
 #define DS18B20_H
-
+#include <Arduino.h>
 
 // Define the number of sensors
 #define NUM_SENSORS 13
