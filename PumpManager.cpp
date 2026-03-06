@@ -1,4 +1,5 @@
 #include "PumpManager.h"
+#include <Arduino.h>
 #include "Config.h"
 #include "Logging.h"
 #include "TemperatureControl.h"
@@ -10,7 +11,6 @@
 #include "AlarmManager.h"
 #include "DiagLog.h"
 #include "Config.h"
-#include <Arduino.h>
 #include <RTClib.h>
 #include "DS18B20.h"
 

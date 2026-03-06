@@ -1,14 +1,15 @@
 #include "RTCManager.h"
+#include <Arduino.h>
+#include <RTClib.h>
 #include "Config.h"
 #include "Logging.h"
 #include "WebServerManager.h" 
 #include "TimeSync.h"
 #include "PumpManager.h"
-#include <RTClib.h>
-#include <Wire.h> // ✅ Required for Wire.begin
+#include <Wire.h>
 #include "AlarmManager.h"
 #include "DiagLog.h"
-#include <Arduino.h>
+
 
 RTC_DS3231 rtc;
 DateTime CurrentTime; 

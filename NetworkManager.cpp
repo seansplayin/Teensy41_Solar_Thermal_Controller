@@ -1,9 +1,10 @@
 #include "NetworkManager.h"
+#include <Arduino.h>
+#include <AsyncWebServer_Teensy41.h>  
 #include "WebServerManager.h"
 #include <QNEthernet.h>
 #include "AlarmWebpage.h"
-#include <Arduino.h>  // For Serial, millis, delay
-#include <AsyncWebServer_Teensy41.h>  // For AsyncWebServer (server)
+
 
 
 using namespace qindesign::network;   // ← THIS FIXES Ethernet & LinkON

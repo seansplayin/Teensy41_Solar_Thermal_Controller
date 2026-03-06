@@ -1,8 +1,9 @@
 #include "MemoryStats.h"
+#include <Arduino.h>
 #include "Config.h"
 #include "DiagLog.h"
-#include <malloc.h> // Standard C malloc info
-#include <Arduino.h> 
+#include <malloc.h> 
+
 
 extern "C" struct mallinfo mallinfo(void);
 
