@@ -1,14 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-
+#include <arduino_freertos.h>
 #include <Arduino.h>
 #include <LittleFS.h>
 #include "DiagConfig.h"
-
-// FreeRTOS
-#include <arduino_freertos.h>
 #include <semphr.h>
-#include <LittleFS.h>
+#include "FileSystemManager.h"
 
 
 

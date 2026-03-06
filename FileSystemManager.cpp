@@ -54,14 +54,15 @@ void closeLogFileLocked(File& f) {
     xSemaphoreGive(fileSystemMutex);
 }
 
-String getFSStatsString() {
+const char* getFSStatsString() {
     if (!g_fileSystemReady) return "{\"error\":\"FS Not Ready\"}";
     
-    // ✅ Fixed API names: totalSize / usedSize
     size_t total = FlashFS.totalSize();
     size_t used = FlashFS.usedSize();
     
-    return "{\"usedBytes\":" + String(used) + ",\"totalBytes\":" + String(total) + "}";
+    static char buf[64];
+    snprintf(buf, sizeof(buf), "{\"usedBytes\":%zu,\"totalBytes\":%zu}", used, total);
+    return buf;
 }
 
 void enforceTemperatureLogDiskLimit() {}
@@ -76,3 +77,4 @@ bool takeFileSystemMutexWithRetry(const char *tag, TickType_t perAttemptTicks, i
 }
 void closeAllOpenPumpLogs() {}
 void LittleFSformat() { FlashFS.format(); }
+

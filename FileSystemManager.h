@@ -2,15 +2,13 @@
 #ifndef FILESYSTEM_MANAGER_H
 #define FILESYSTEM_MANAGER_H
 
-// Include necessary headers for types
+#include <Arduino.h>  // For String and F macro
+#include <arduino_freertos.h>  // For SemaphoreHandle_t, TickType_t
 #include <LittleFS.h>  // For LittleFS_QSPI, File
-#include <arduino_freertos.h>  // For SemaphoreHandle_t
 
-// Extern declarations
+// Extern declarations only
 extern LittleFS_QSPI FlashFS;
 extern SemaphoreHandle_t fileSystemMutex;
-
-// Add this for g_fileSystemReady
 extern bool g_fileSystemReady;
 
 // Function prototypes (use const char* for strings to avoid String type)
@@ -19,6 +17,6 @@ File openLogFileLocked(const char* filename, const char* mode);
 void closeLogFileLocked(File& f);
 const char* getFSStatsString();
 void fileSystemCleanupTask(void *pvParameters);
-bool takeFileSystemMutexWithRetry(const char *tag, unsigned long perAttemptTicks, int maxAttempts);  // Use unsigned long for TickType_t if needed
+bool takeFileSystemMutexWithRetry(const char *tag, TickType_t perAttemptTicks, int maxAttempts);
 
 #endif // FILESYSTEM_MANAGER_H
