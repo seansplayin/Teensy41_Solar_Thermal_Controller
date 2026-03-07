@@ -63,7 +63,7 @@ static void ensureMutex() {
   if (!s_histMutex) s_histMutex = xSemaphoreCreateMutex();
 }
 
-static void jsonEscapePrint(Print& out, const char* s) {
+void jsonEscapePrint(Print& out, const char* s) {
   for (const char* p=s; p && *p; ++p) {
     if (*p=='\\' || *p=='"') out.print('\\');
     out.print(*p);
@@ -259,7 +259,7 @@ static void loadFromFSUnlocked() {
     line[n] = '\0';
     if (n < 10) continue;
 
-    DynamicJsonDocument doc(256);
+    JsonDocument doc(256);
     DeserializationError err = deserializeJson(doc, line);
     if (err) continue;
 

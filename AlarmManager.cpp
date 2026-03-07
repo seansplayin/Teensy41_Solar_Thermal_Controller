@@ -127,8 +127,8 @@ void AlarmManager_set(AlarmCode code, AlarmSeverity sev, const char* fmt, ...) {
 
       st.active = true;
       st.sev = sev;
-      strncpy(st.detail, detail, sizeof(st.detail)-1);
-      st.detail[sizeof(st.detail)-1] = '\0';
+      strncpy(st.detail, detail, sizeof(st.detail) - 1);
+      st.detail[sizeof(st.detail) - 1] = '\0';
       changed = true;
       pushEvent(code, sev, ALM_ACT_SET, st.detail);
     }

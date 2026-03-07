@@ -986,7 +986,7 @@ void TaskWebSocketTransmitter(void* pvParameters) {
         // 7. FS Stats & Telemetry (Every 30 seconds)
         else if ((uint32_t)(now - lastFsMs) >= 30000UL) {
             lastFsMs = now;
-            broadcastMessageOverWebSocket(String("FSStats:") + getFSStatsString());
+            broadcastMessageOverWebSocket(String("FSStats:") + getFSStatsString(), "FSStats");
             
             const uint32_t called  = (uint32_t)g_tempBcastCalled;
             const uint32_t skipped = (uint32_t)g_tempBcastSkipped;
