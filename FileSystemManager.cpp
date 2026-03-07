@@ -1,12 +1,12 @@
-#include <arduino_freertos.h>
-#include "FileSystemManager.h"
-#include <Arduino.h>
+// FileSystemManager.cpp - Include everything here
+#include <Arduino.h>  // For String and F macro
+#include <arduino_freertos.h>  // For SemaphoreHandle_t, TickType_t
+#include <LittleFS.h>  // For LittleFS_QSPI, File
 
+#include "FileSystemManager.h"
 #include "Logging.h" 
 #include "Config.h"
 #include "DiagLog.h"
-
-
 
 // Definitions
 SemaphoreHandle_t fileSystemMutex = nullptr;

@@ -1,17 +1,19 @@
-// FileSystemManager.h - Updated version with externs only, no includes for libraries
+// FileSystemManager.h - Updated version with forward declarations only
 #ifndef FILESYSTEM_MANAGER_H
 #define FILESYSTEM_MANAGER_H
 
-#include <Arduino.h>  // For String and F macro
-#include <arduino_freertos.h>  // For SemaphoreHandle_t, TickType_t
-#include <LittleFS.h>  // For LittleFS_QSPI, File
+// Forward declarations for types
+class LittleFS_QSPI;
+struct File;
+typedef void * SemaphoreHandle_t;
+typedef unsigned long TickType_t;
 
-// Extern declarations only
+// Extern declarations
 extern LittleFS_QSPI FlashFS;
 extern SemaphoreHandle_t fileSystemMutex;
 extern bool g_fileSystemReady;
 
-// Function prototypes (use const char* for strings to avoid String type)
+// Function prototypes
 File openLogFileUnlocked(const char* filename, const char* mode);
 File openLogFileLocked(const char* filename, const char* mode);
 void closeLogFileLocked(File& f);
