@@ -8,7 +8,7 @@
 #include "FileSystemManager.h"
 #include "AlarmHistory.h"
 #include "DiagLog.h"
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 #include <stdint.h>
 #include "AlarmManager.h"
 
@@ -259,7 +259,7 @@ static void loadFromFSUnlocked() {
     line[n] = '\0';
     if (n < 10) continue;
 
-    BasicJsonDocument<std::allocator<void>> doc(256);
+    DynamicJsonDocument doc(256);
     DeserializationError err = deserializeJson(doc, line);
     if (err) continue;
 

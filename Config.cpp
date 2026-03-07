@@ -8,6 +8,8 @@
 #include "DiagLog.h"
 #include "DiagConfig.h"
 
+const size_t JSON_BUFFER_SIZE = 2048; // or larger if needed
+
 extern float panelT;           
 extern float CSupplyT;         
 extern float storageT;         
@@ -116,7 +118,7 @@ bool loadSystemConfigFromFS() {
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -173,7 +175,7 @@ bool saveSystemConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[Config] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
 
   doc["panelTminimum"] = g_config.panelTminimumValue;
   doc["PanelOnDifferential"] = g_config.panelOnDifferential;
@@ -243,7 +245,7 @@ bool loadTimeConfigFromFS() {
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -261,7 +263,7 @@ bool saveTimeConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[TimeConfig] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
   doc["timeZoneId"] = g_timeConfig.timeZoneId;
   doc["dstEnabled"] = g_timeConfig.dstEnabled;
 
@@ -316,7 +318,7 @@ bool loadDiagSerialConfigFromFS() {
   File f = FlashFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -338,7 +340,7 @@ bool saveDiagSerialConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[Config] save diag", pdMS_TO_TICKS(1000), 2)) return false;
 
-  BasicJsonDocument<std::allocator<void>> doc(N);
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
   doc["diagSerialEnable"] = g_config.diagSerialEnable;
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
