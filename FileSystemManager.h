@@ -1,12 +1,10 @@
-// FileSystemManager.h - Updated version with forward declarations only
+// FileSystemManager.h - Updated version
 #ifndef FILESYSTEM_MANAGER_H
 #define FILESYSTEM_MANAGER_H
 
-// Forward declarations for types
-class LittleFS_QSPI;
-struct File;
-typedef void * SemaphoreHandle_t;
-typedef unsigned long TickType_t;
+#include <Arduino.h>  // For String and F macro
+#include <LittleFS.h>  // For LittleFS_QSPI, File
+#include <arduino_freertos.h>  // For SemaphoreHandle_t, TickType_t
 
 // Extern declarations
 extern LittleFS_QSPI FlashFS;
