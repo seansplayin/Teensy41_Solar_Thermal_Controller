@@ -116,8 +116,7 @@ bool loadSystemConfigFromFS() {
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  JsonDocument doc;
-  doc.reserve(1024);
+  BasicJsonDocument<std::allocator<void>> doc(N);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -174,8 +173,7 @@ bool saveSystemConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[Config] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  JsonDocument doc;
-  doc.reserve(1024);
+  BasicJsonDocument<std::allocator<void>> doc(N);
 
   doc["panelTminimum"] = g_config.panelTminimumValue;
   doc["PanelOnDifferential"] = g_config.panelOnDifferential;
@@ -201,10 +199,10 @@ bool saveSystemConfigToFS() {
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
 
-  JsonArray cfSensors = doc.add<JsonArray>("collectorFreezeSensors");
+  JsonArray cfSensors = doc["collectorFreezeSensors"].to<JsonArray>();
   for (uint8_t* s = g_config.collectorFreezeSensors; *s; s++) cfSensors.add(*s);
 
-  JsonArray lfSensors = doc.add<JsonArray>("lineFreezeSensors");
+  JsonArray lfSensors = doc["lineFreezeSensors"].to<JsonArray>();
   for (uint8_t* s = g_config.lineFreezeSensors; *s; s++) lfSensors.add(*s);
 
   File f = FlashFS.open(SYSTEM_CONFIG_PATH, FILE_WRITE);
@@ -245,8 +243,7 @@ bool loadTimeConfigFromFS() {
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  JsonDocument doc;
-  doc.reserve(256);
+  BasicJsonDocument<std::allocator<void>> doc(N);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -264,8 +261,7 @@ bool saveTimeConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[TimeConfig] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  JsonDocument doc;
-  doc.reserve(256);
+  BasicJsonDocument<std::allocator<void>> doc(N);
   doc["timeZoneId"] = g_timeConfig.timeZoneId;
   doc["dstEnabled"] = g_timeConfig.dstEnabled;
 
@@ -320,8 +316,7 @@ bool loadDiagSerialConfigFromFS() {
   File f = FlashFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
-  JsonDocument doc;
-  doc.reserve(256);
+  BasicJsonDocument<std::allocator<void>> doc(N);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -343,8 +338,7 @@ bool saveDiagSerialConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[Config] save diag", pdMS_TO_TICKS(1000), 2)) return false;
 
-  JsonDocument doc;
-  doc.reserve(256);
+  BasicJsonDocument<std::allocator<void>> doc(N);
   doc["diagSerialEnable"] = g_config.diagSerialEnable;
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 

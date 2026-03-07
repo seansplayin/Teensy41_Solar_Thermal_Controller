@@ -15,7 +15,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
 typedef unsigned long TickType_t;
 
 // Extern declarations
-extern LittleFS_QSPI FlashFS;
+extern LittleFS_QSPIFlash;
 extern SemaphoreHandle_t fileSystemMutex;
 extern bool g_fileSystemReady;
 

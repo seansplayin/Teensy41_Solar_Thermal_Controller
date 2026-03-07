@@ -259,8 +259,7 @@ static void loadFromFSUnlocked() {
     line[n] = '\0';
     if (n < 10) continue;
 
-    JsonDocument doc;
-    doc.reserve(256);
+    BasicJsonDocument<std::allocator<void>> doc(256);
     DeserializationError err = deserializeJson(doc, line);
     if (err) continue;
 

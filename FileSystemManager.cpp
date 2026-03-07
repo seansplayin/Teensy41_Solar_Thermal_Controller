@@ -1,7 +1,7 @@
 // FileSystemManager.cpp - Include full headers here
 #include "FileSystemManager.h"
 #include <arduino_freertos.h>  // For actual FreeRTOS definitions
-#include <LittleFS.h>  // For LittleFS_QSPI, File
+#include <LittleFS.h>  // For extern LittleFS_QSPIFlash FlashFS;
 #include <Arduino.h>
 #include "Logging.h" 
 #include "Config.h"
@@ -16,7 +16,7 @@ bool g_fileSystemReady = false;
 void initializeFileSystem() {
     if (!fileSystemMutex) fileSystemMutex = xSemaphoreCreateMutex();
 
-    LOG_CAT(DBG_FS, "[FS] Mounting FlashFS (LittleFS_QSPI)...\n");
+    LOG_CAT(DBG_FS, "[FS] Mounting FlashFS (LittleFS_QSPIFlash FlashFS)...\n");
     
     if (!FlashFS.begin()) {
         LOG_ERR("[FS] Mount failed. Formatting...\n");
