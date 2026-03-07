@@ -3,7 +3,11 @@
 #include <RTClib.h>   
 #include <queue.h> 
 
-
+struct LogEvent {
+  uint8_t pumpIndex;   // 0–9
+  bool isStart;        // true=START, false=STOP
+  DateTime ts;         // timestamp
+};
 void logPumpEvent(int pumpIndex, const String& event);
 void listAllFiles();
 void readAndPrintLogFile(const String& filename);

@@ -87,4 +87,6 @@ void     AlarmManager_event(AlarmCode code, AlarmSeverity sev, const char* fmt, 
 size_t   AlarmManager_getRecentEvents(AlarmEvent* out, size_t max);
 size_t   AlarmManager_getActiveStates(AlarmCode* codesOut, AlarmState* statesOut, size_t max);
 
+void AlarmManager_writeActiveJson(Print& out);
+
 #endif // ALARMMANAGER_H

@@ -16,7 +16,6 @@
 #include <LittleFS.h>
 #include <Arduino.h>
 #include <Arduino.h>
-// ✅ Teensy FreeRTOS Headers (Flat structure)
 #include <arduino_freertos.h>
 #include <queue.h>
 #include <semphr.h>

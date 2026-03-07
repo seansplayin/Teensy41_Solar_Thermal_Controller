@@ -3,6 +3,7 @@
 #define FILESYSTEM_MANAGER_H
 
 #include <Arduino.h>  // For F macro and other Arduino types
+#include <LittleFS.h> 
 
 // Forward declarations to avoid including headers
 class LittleFS_QSPI;
@@ -15,7 +16,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
 typedef unsigned long TickType_t;
 
 // Extern declarations
-extern LittleFS_QSPIFlash;
+
+extern LittleFS_QSPIFlash FlashFS;
 extern SemaphoreHandle_t fileSystemMutex;
 extern bool g_fileSystemReady;
 
@@ -26,5 +28,6 @@ void closeLogFileLocked(File& f);
 const char* getFSStatsString();
 void fileSystemCleanupTask(void *pvParameters);
 bool takeFileSystemMutexWithRetry(const char *tag, TickType_t perAttemptTicks, int maxAttempts);
+void initializeFileSystem();
 
 #endif // FILESYSTEM_MANAGER_H

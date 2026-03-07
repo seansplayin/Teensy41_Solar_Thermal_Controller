@@ -1,4 +1,5 @@
 #include "TimeSync.h"
+#include <arduino_freertos.h> 
 #include "Logging.h"
 #include "RTCManager.h"
 #include "Config.h"
@@ -6,7 +7,6 @@
 #include <Wire.h>
 #include <TimeLib.h>
 #include <RTClib.h>
-#include <arduino_freertos.h> 
 #include "DiagLog.h"
 #include "AlarmManager.h"
 #include "timers.h"

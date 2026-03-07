@@ -18,12 +18,7 @@ extern void runHourlyHealthCheck();
 
 extern SemaphoreHandle_t fileSystemMutex;
 
-// ────── LogEvent definition ─────────
-struct LogEvent {
-  uint8_t  pumpIndex;   // 0–9
-  bool     isStart;     // true=START, false=STOP
-  DateTime ts;          // timestamp
-};
+
 /*
 // --- MEMORY MONITORING (Teensy Version) ---
 static void memMark(const char* tag) {

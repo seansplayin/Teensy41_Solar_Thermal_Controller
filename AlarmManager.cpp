@@ -219,3 +219,21 @@ size_t AlarmManager_getActiveStates(AlarmCode* codesOut, AlarmState* statesOut, 
   }
   return n;
 }
+
+void AlarmManager_writeActiveJson(Print& out) {
+  AlarmCode codes[ALM_CODE_MAX + 1];
+  AlarmState states[ALM_CODE_MAX + 1];
+  size_t n = AlarmManager_getActiveStates(codes, states, ALM_CODE_MAX + 1);
+  out.print("[");
+  for (size_t i = 0; i < n; i++) {
+    if (i > 0) out.print(",");
+    out.print("{\"code\":"); out.print(codes[i]);
+    out.print(",\"sev\":"); out.print(states[i].sev);
+    out.print(",\"since\":"); out.print(states[i].sinceEpoch);
+    out.print(",\"msg\":\""); jsonEscapePrint(out, states[i].detail); out.print("\"}");
+  }
+  out.print("]");
+}
+
+
+
