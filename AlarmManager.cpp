@@ -8,6 +8,7 @@
 #include "DiagLog.h"
 #include "WebServerManager.h"
 #include <AsyncWebServer_Teensy41.h>
+#include <Arduino.h>
 
 static SemaphoreHandle_t s_alarmMutex = nullptr;
 

@@ -15,6 +15,8 @@
 #include <AsyncWebServer_Teensy41.h>
 #include <RTClib.h>
 #include <Arduino.h>
+#include <Arduino.h>
+
 
 static bool isSafePath(const String& p) {
     return !p.startsWith("..") && p.indexOf("../") == -1 && p.length() < 200;

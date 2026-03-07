@@ -12,7 +12,7 @@
 #include "DiagLog.h"
 #include <RTClib.h>
 #include "RTCManager.h"   // for extern DateTime CurrentTime
-
+#include <Arduino.h>
 
 
 extern DateTime CurrentTime;   

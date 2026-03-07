@@ -1,9 +1,8 @@
-// FileSystemManager.cpp - Include everything here
-#include <Arduino.h>  // For String and F macro
-#include <arduino_freertos.h>  // For SemaphoreHandle_t, TickType_t
-#include <LittleFS.h>  // For LittleFS_QSPI, File
-
+// FileSystemManager.cpp - Include full headers here
 #include "FileSystemManager.h"
+#include <arduino_freertos.h>  // For actual FreeRTOS definitions
+#include <LittleFS.h>  // For LittleFS_QSPI, File
+#include <Arduino.h>
 #include "Logging.h" 
 #include "Config.h"
 #include "DiagLog.h"

@@ -1,6 +1,6 @@
 // AlarmHistory.h
 #pragma once
-
+#include <ArduinoJson.h>
 
 // Call early (ok before FS)
 void AlarmHistory_begin();

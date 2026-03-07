@@ -8,7 +8,7 @@
 #include "DS18B20.h"
 #include "DiagLog.h"
 #include <AsyncWebServer_Teensy41.h>
-
+#include <Arduino.h>
 
 // Define the mutex handles
 

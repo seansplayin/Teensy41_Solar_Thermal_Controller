@@ -10,7 +10,7 @@
 #include "DiagLog.h"
 #include "AlarmManager.h"
 #include "timers.h"
-
+#include <Arduino.h>
 
 extern DateTime CurrentTime;
 bool needToSyncTime = true;

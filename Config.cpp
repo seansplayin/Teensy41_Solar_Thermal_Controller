@@ -7,6 +7,7 @@
 //#include "TarGZ.h"
 #include "DiagLog.h"
 #include "DiagConfig.h"
+#include <Arduino.h>
 
 extern float panelT;           
 extern float CSupplyT;         

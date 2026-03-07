@@ -5,7 +5,7 @@
 #include "DiagLog.h"
 #include "AlarmManager.h"
 #include <arduino_freertos.h>
-
+#include <Arduino.h>
 
 
 #define NUM_SENSORS 13

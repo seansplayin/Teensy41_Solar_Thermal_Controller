@@ -6,7 +6,7 @@
 #include "Config.h"
 #include "FileSystemManager.h"
 #include "DiagLog.h"
-
+#include <Arduino.h>
 
 #define VERSION_INFO " -AsyncWebServer123_ESP_V5_IDE_2.3.6- "
 
