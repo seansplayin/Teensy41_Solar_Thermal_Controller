@@ -9,7 +9,7 @@
 
 // Definitions
 SemaphoreHandle_t fileSystemMutex = nullptr;
-LittleFS_QSPI FlashFS;
+LittleFS_QSPIFlash FlashFS;
 
 bool g_fileSystemReady = false;
 

@@ -1,7 +1,6 @@
 #define CORE_TEENSY
 #include <Arduino.h>
 #include <LittleFS.h>
-LittleFS_Program LittleFS;   // uses internal flash (perfect for Teensy 4.1)
 #include <arduino_freertos.h>
 #include <AsyncWebServer_Teensy41.h>
 #include <RTClib.h>

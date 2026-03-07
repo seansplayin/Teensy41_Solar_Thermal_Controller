@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include "AlarmManager.h"
 
-
-
 extern bool g_fileSystemReady;
 extern SemaphoreHandle_t fileSystemMutex;
 
@@ -90,8 +88,7 @@ static void normalizeDetailKey(const char* in, char* out, size_t outSize) {
   }
 }
 
-static void normalizeDetailForGrouping(const char* in, char* out, size_t outSz)
-{
+static void normalizeDetailForGrouping(const char* in, char* out, size_t outSz) {
   if (!out || outSz == 0) return;
   out[0] = '\0';
   if (!in) return;
@@ -186,7 +183,7 @@ static void applyRecord(uint32_t id, uint32_t epoch, uint8_t sev, uint16_t code,
       if (slot < 0) return;           // should never happen
     }
     Group& g = s_groups[slot];
-    memset(&g, 0, sizeof(Group));
+    g = {}; // Value-initialize to zero/false
     g.used = true;
     g.sev = sev;
     g.code = code;
@@ -208,12 +205,12 @@ static bool persistUnlocked() {
     return false;
   }
 
-  if (!LittleFS.exists(DIR_PATH)) LittleFS.mkdir(DIR_PATH);
+  if (!FlashFS.exists(DIR_PATH)) FlashFS.mkdir(DIR_PATH);
 
   // Rewrite file atomically:
-  if (LittleFS.exists(TMP_PATH)) LittleFS.remove(TMP_PATH);
+  if (FlashFS.exists(TMP_PATH)) FlashFS.remove(TMP_PATH);
 
-  File f = LittleFS.open(TMP_PATH, FILE_WRITE);
+  File f = FlashFS.open(TMP_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
   // Write all records in group order (newest first per group)
@@ -233,8 +230,8 @@ static bool persistUnlocked() {
   f.close();
 
   // Replace old file
-  if (LittleFS.exists(LOG_PATH)) LittleFS.remove(LOG_PATH);
-  bool ok = LittleFS.rename(TMP_PATH, LOG_PATH);
+  if (FlashFS.exists(LOG_PATH)) FlashFS.remove(LOG_PATH);
+  bool ok = FlashFS.rename(TMP_PATH, LOG_PATH);
 
   xSemaphoreGive(fileSystemMutex);
   return ok;
@@ -248,12 +245,12 @@ static void loadFromFSUnlocked() {
     return;
   }
 
-  if (!LittleFS.exists(LOG_PATH)) {
+  if (!FlashFS.exists(LOG_PATH)) {
     xSemaphoreGive(fileSystemMutex);
     return;
   }
 
-  File f = LittleFS.open(LOG_PATH, FILE_READ);
+  File f = FlashFS.open(LOG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return; }
 
   char line[256];
@@ -262,7 +259,8 @@ static void loadFromFSUnlocked() {
     line[n] = '\0';
     if (n < 10) continue;
 
-    DynamicJsonDocument doc(256);
+    JsonDocument doc;
+    doc.reserve(256);
     DeserializationError err = deserializeJson(doc, line);
     if (err) continue;
 
@@ -281,7 +279,6 @@ static void loadFromFSUnlocked() {
   xSemaphoreGive(fileSystemMutex);
 }
 
-
 static void AlarmHistory_sink(const AlarmEvent* e) {
   if (!e || !s_q) return;
   Msg m;
@@ -296,7 +293,6 @@ static void AlarmHistory_sink(const AlarmEvent* e) {
   // Non-blocking enqueue (drop if full)
   xQueueSend(s_q, &m, 0);
 }
-
 
 static void AlarmHistory_task(void*) {
   for (;;) {
@@ -319,7 +315,6 @@ static void AlarmHistory_task(void*) {
   }
 }
 
-
 void AlarmHistory_begin() {
   ensureMutex();
   if (!s_q) s_q = xQueueCreate(16, sizeof(Msg));
@@ -333,7 +328,9 @@ void AlarmHistory_onFileSystemReady() {
   ensureMutex();
   if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(2000)) == pdTRUE) {
     // Load persisted state
-    memset(s_groups, 0, sizeof(s_groups));
+    for (auto& group : s_groups) {
+      group = {};
+    }
     s_nextId = 1;
     loadFromFSUnlocked();
 
@@ -364,122 +361,84 @@ static void collectUsedGroupIndices(int* idx, int& n) {
 
 void AlarmHistory_writeJson(Print& out) {
   ensureMutex();
-  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(200)) != pdTRUE) {
-    out.print("{\"error\":\"mutex\"}");
-    return;
-  }
-
-  // Include active alarm states
-  AlarmCode codes[32];
-  AlarmState states[32];
-  size_t ac = AlarmManager_getActiveStates(codes, states, 32);
-
-  out.print("{\"activeCount\":");
-  out.print((uint32_t)AlarmManager_activeCount());
-  out.print(",\"active\":[");
-  for (size_t i=0;i<ac;i++){
-    out.print("{\"code\":"); out.print((int)codes[i]);
-    out.print(",\"sev\":"); out.print((int)states[i].sev);
-    out.print(",\"since\":"); out.print(states[i].sinceEpoch);
-    out.print(",\"detail\":\""); jsonEscapePrint(out, states[i].detail); out.print("\"}");
-    if (i+1<ac) out.print(",");
-  }
-  out.print("],\"groups\":[");
-
-  int order[MAX_GROUPS], n=0;
-  collectUsedGroupIndices(order, n);
-
-  for (int oi=0; oi<n; oi++){
-    Group& g = s_groups[order[oi]];
-    out.print("{\"sev\":"); out.print(g.sev);
-    out.print(",\"code\":"); out.print(g.code);
-    out.print(",\"act\":"); out.print(g.action);
-    out.print(",\"latest\":{\"id\":"); out.print(g.recs[0].id);
-    out.print(",\"ts\":"); out.print(g.recs[0].epoch);
-    out.print(",\"detail\":\""); jsonEscapePrint(out, g.recs[0].detail); out.print("\"}");
-    out.print(",\"dupes\":[");
-    for (int r=1; r<g.count; r++){
-      out.print("{\"id\":"); out.print(g.recs[r].id);
-      out.print(",\"ts\":"); out.print(g.recs[r].epoch);
-      out.print(",\"detail\":\""); jsonEscapePrint(out, g.recs[r].detail); out.print("\"}");
-      if (r+1<g.count) out.print(",");
+  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
+    // Active alarms
+    out.print("{\"active\":");
+    AlarmManager_writeActiveJson(out);
+    out.print(",\"history\":[");
+    int idx[MAX_GROUPS];
+    int n;
+    collectUsedGroupIndices(idx, n);
+    for (int i=0;i<n;i++){
+      if (i>0) out.print(",");
+      Group& g = s_groups[idx[i]];
+      out.print("{\"sev\":"); out.print(g.sev);
+      out.print(",\"code\":"); out.print(g.code);
+      out.print(",\"action\":"); out.print(g.action);
+      out.print(",\"msg\":\""); jsonEscapePrint(out, g.recs[0].detail); out.print("\"");
+      out.print(",\"ts\":"); out.print(g.recs[0].epoch);
+      out.print(",\"count\":"); out.print(g.count);
+      out.print(",\"id\":"); out.print(g.recs[0].id);
+      out.print("}");
     }
     out.print("]}");
-    if (oi+1<n) out.print(",");
+    xSemaphoreGive(s_histMutex);
   }
-
-  out.print("]}");
-  xSemaphoreGive(s_histMutex);
 }
 
-static int cmp_u32(const void* a, const void* b) {
-  uint32_t A = *(const uint32_t*)a, B = *(const uint32_t*)b;
-  return (A<B)?-1:(A>B)?1:0;
-}
-
-static bool binHas(const uint32_t* arr, size_t n, uint32_t v) {
-  size_t lo=0, hi=n;
-  while (lo<hi){
-    size_t mid=(lo+hi)/2;
-    if (arr[mid]==v) return true;
-    if (arr[mid]<v) lo=mid+1; else hi=mid;
-  }
-  return false;
-}
-
-bool AlarmHistory_deleteIds(const uint32_t* ids, size_t n) {
-  if (!ids || n==0) return true;
+bool AlarmHistory_deleteIds(const uint32_t* ids, size_t nIds) {
+  if (nIds == 0) return true;
 
   ensureMutex();
-  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(2000)) != pdTRUE) return false;
+  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(200)) != pdTRUE) return false;
 
-  // sort for binary search
-  uint32_t* tmp = (uint32_t*)malloc(n*sizeof(uint32_t));
-  if (!tmp) { xSemaphoreGive(s_histMutex); return false; }
-  memcpy(tmp, ids, n*sizeof(uint32_t));
-  qsort(tmp, n, sizeof(uint32_t), cmp_u32);
+  bool changed = false;
 
-  for (int gi=0; gi<MAX_GROUPS; gi++){
-    Group& g = s_groups[gi];
-    if (!g.used) continue;
+  for (size_t j=0;j<nIds;j++){
+    uint32_t targetId = ids[j];
 
-    Rec kept[1+MAX_DUPES];
-    uint8_t keptN = 0;
+    for (int gi=0;gi<MAX_GROUPS;gi++){
+      Group& g = s_groups[gi];
+      if (!g.used) continue;
 
-    for (int r=0; r<g.count; r++){
-      if (!binHas(tmp, n, g.recs[r].id)) {
-        kept[keptN++] = g.recs[r];
+      for (int ri=0;ri<g.count;ri++){
+        if (g.recs[ri].id == targetId) {
+          // Shift left
+          for (int k=ri; k<g.count-1; k++) {
+            g.recs[k] = g.recs[k+1];
+          }
+          g.count--;
+          changed = true;
+
+          if (g.count == 0) {
+            g = {}; // Clear group
+          } else {
+            // Update latest
+            g.latestEpoch = g.recs[0].epoch;
+          }
+          break;
+        }
       }
     }
-
-    if (keptN == 0) {
-      memset(&g, 0, sizeof(Group));
-      g.used = false;
-      continue;
-    }
-
-    memcpy(g.recs, kept, sizeof(Rec)*keptN);
-    g.count = keptN;
-    g.latestEpoch = g.recs[0].epoch;
   }
 
-  free(tmp);
-
-  bool ok = true;
-  if (g_fileSystemReady) ok = persistUnlocked();
-
   xSemaphoreGive(s_histMutex);
-  return ok;
+
+  if (changed && g_fileSystemReady) persistUnlocked();
+  return changed;
 }
 
 bool AlarmHistory_clearAll() {
   ensureMutex();
-  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(2000)) != pdTRUE) return false;
+  if (xSemaphoreTake(s_histMutex, pdMS_TO_TICKS(200)) != pdTRUE) return false;
 
-  memset(s_groups, 0, sizeof(s_groups));
-  bool ok = true;
-  if (g_fileSystemReady) ok = persistUnlocked();
+  for (auto& group : s_groups) {
+    group = {};
+  }
+  s_nextId = 1;
 
   xSemaphoreGive(s_histMutex);
-  return ok;
+
+  if (g_fileSystemReady) persistUnlocked();
+  return true;
 }

@@ -7,7 +7,6 @@
 //#include "TarGZ.h"
 #include "DiagLog.h"
 #include "DiagConfig.h"
-#include <Arduino.h>
 
 extern float panelT;           
 extern float CSupplyT;         
@@ -104,20 +103,21 @@ bool loadSystemConfigFromFS() {
   if (!takeFileSystemMutexWithRetry("[Config] load", pdMS_TO_TICKS(1000), 2)) return false;
 
     // One-time migration: move legacy root file into /Json_Config_Files if needed
-  if (!LittleFS.exists(SYSTEM_CONFIG_PATH) && LittleFS.exists(SYSTEM_CONFIG_PATH_OLD)) {
-    LittleFS.rename(SYSTEM_CONFIG_PATH_OLD, SYSTEM_CONFIG_PATH);
+  if (!FlashFS.exists(SYSTEM_CONFIG_PATH) && FlashFS.exists(SYSTEM_CONFIG_PATH_OLD)) {
+    FlashFS.rename(SYSTEM_CONFIG_PATH_OLD, SYSTEM_CONFIG_PATH);
   }
 
-  if (!LittleFS.exists(SYSTEM_CONFIG_PATH)) {
+  if (!FlashFS.exists(SYSTEM_CONFIG_PATH)) {
     xSemaphoreGive(fileSystemMutex);
     return false;
   }
 
-  File f = LittleFS.open(SYSTEM_CONFIG_PATH, FILE_READ);
+  File f = FlashFS.open(SYSTEM_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
+  doc.reserve(1024);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -162,8 +162,8 @@ bool loadSystemConfigFromFS() {
   }
   g_config.lineFreezeSensors[i] = 0;
 
-  if (doc.containsKey("diagSerialEnable")) g_config.diagSerialEnable = doc["diagSerialEnable"].as<bool>();
-  if (doc.containsKey("diagSerialMask"))   g_config.diagSerialMask   = doc["diagSerialMask"].as<uint32_t>();
+  if (!doc["diagSerialEnable"].isNull()) g_config.diagSerialEnable = doc["diagSerialEnable"].as<bool>();
+  if (!doc["diagSerialMask"].isNull())   g_config.diagSerialMask   = doc["diagSerialMask"].as<uint32_t>();
 
   return true;
   
@@ -174,7 +174,8 @@ bool saveSystemConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[Config] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
+  doc.reserve(1024);
 
   doc["panelTminimum"] = g_config.panelTminimumValue;
   doc["PanelOnDifferential"] = g_config.panelOnDifferential;
@@ -200,13 +201,13 @@ bool saveSystemConfigToFS() {
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
 
-  JsonArray cfSensors = doc.createNestedArray("collectorFreezeSensors");
+  JsonArray cfSensors = doc.add<JsonArray>("collectorFreezeSensors");
   for (uint8_t* s = g_config.collectorFreezeSensors; *s; s++) cfSensors.add(*s);
 
-  JsonArray lfSensors = doc.createNestedArray("lineFreezeSensors");
+  JsonArray lfSensors = doc.add<JsonArray>("lineFreezeSensors");
   for (uint8_t* s = g_config.lineFreezeSensors; *s; s++) lfSensors.add(*s);
 
-  File f = LittleFS.open(SYSTEM_CONFIG_PATH, FILE_WRITE);
+  File f = FlashFS.open(SYSTEM_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
   serializeJson(doc, f);
   f.close();
@@ -231,20 +232,21 @@ bool loadTimeConfigFromFS() {
   if (!takeFileSystemMutexWithRetry("[TimeConfig] load", pdMS_TO_TICKS(1000), 2)) return false;
 
     // One-time migration: move legacy root file into /Json_Config_Files if needed
-  if (!LittleFS.exists(TIME_CONFIG_PATH) && LittleFS.exists(TIME_CONFIG_PATH_OLD)) {
-    LittleFS.rename(TIME_CONFIG_PATH_OLD, TIME_CONFIG_PATH);
+  if (!FlashFS.exists(TIME_CONFIG_PATH) && FlashFS.exists(TIME_CONFIG_PATH_OLD)) {
+    FlashFS.rename(TIME_CONFIG_PATH_OLD, TIME_CONFIG_PATH);
   }
 
-  if (!LittleFS.exists(TIME_CONFIG_PATH)) {
+  if (!FlashFS.exists(TIME_CONFIG_PATH)) {
     xSemaphoreGive(fileSystemMutex);
     return false;
   }
 
-  File f = LittleFS.open(TIME_CONFIG_PATH, FILE_READ);
+  File f = FlashFS.open(TIME_CONFIG_PATH, FILE_READ);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
 
-  DynamicJsonDocument doc(256);
+  JsonDocument doc;
+  doc.reserve(256);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   xSemaphoreGive(fileSystemMutex);
@@ -262,11 +264,12 @@ bool saveTimeConfigToFS() {
 
   if (!takeFileSystemMutexWithRetry("[TimeConfig] save", pdMS_TO_TICKS(1000), 2)) return false;
 
-  DynamicJsonDocument doc(256);
+  JsonDocument doc;
+  doc.reserve(256);
   doc["timeZoneId"] = g_timeConfig.timeZoneId;
   doc["dstEnabled"] = g_timeConfig.dstEnabled;
 
-    File f = LittleFS.open(TIME_CONFIG_PATH, FILE_WRITE);
+    File f = FlashFS.open(TIME_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
   serializeJson(doc, f);
   f.close();
@@ -307,64 +310,46 @@ bool loadDiagSerialConfigFromFS() {
 #else
   if (!g_fileSystemReady) return false;
 
-  if (!takeFileSystemMutexWithRetry("[Config] loadDiagSerial",
-                                    pdMS_TO_TICKS(2000), 3)) {
-    return false;
-  }
+  if (!takeFileSystemMutexWithRetry("[Config] load diag", pdMS_TO_TICKS(1000), 2)) return false;
 
-  if (!LittleFS.exists(DIAG_SERIAL_CONFIG_PATH)) {
+  if (!FlashFS.exists(DIAG_SERIAL_CONFIG_PATH)) {
     xSemaphoreGive(fileSystemMutex);
     return false;
   }
 
-  File f = LittleFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_READ);
-  if (!f) {
-    xSemaphoreGive(fileSystemMutex);
-    return false;
-  }
+  File f = FlashFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_READ);
+  if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
 
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;
+  doc.reserve(256);
   DeserializationError err = deserializeJson(doc, f);
   f.close();
-
-  if (err) {
-    xSemaphoreGive(fileSystemMutex);
-    return false;
-  }
-
-  // Only override if keys exist
-  if (doc.containsKey("diagSerialEnable")) g_config.diagSerialEnable = doc["diagSerialEnable"].as<bool>();
-  if (doc.containsKey("diagSerialMask"))   g_config.diagSerialMask   = doc["diagSerialMask"].as<uint32_t>();
-
   xSemaphoreGive(fileSystemMutex);
+
+  if (err) return false;
+
+  if (!doc["diagSerialEnable"].isNull()) g_config.diagSerialEnable = doc["diagSerialEnable"].as<bool>();
+  if (!doc["diagSerialMask"].isNull())   g_config.diagSerialMask   = doc["diagSerialMask"].as<uint32_t>();
+
   return true;
 #endif
 }
 
-// When this gets implemented from FirstWebpage make certain this does not overwrite the crash detector that calls DBG_ALL after a crash is detected and inadvertently silence the serial prints. 
 bool saveDiagSerialConfigToFS() {
 #if !ENABLE_SERIAL_DIAGNOSTICS
   return false;
 #else
   if (!g_fileSystemReady) return false;
 
-  if (!takeFileSystemMutexWithRetry("[Config] saveDiagSerial",
-                                    pdMS_TO_TICKS(2000), 3)) {
-    return false;
-  }
+  if (!takeFileSystemMutexWithRetry("[Config] save diag", pdMS_TO_TICKS(1000), 2)) return false;
 
-  // Ensure directory exists
-  if (!LittleFS.exists(DIAG_SERIAL_CONFIG_DIR)) {
-    LittleFS.mkdir(DIAG_SERIAL_CONFIG_DIR);
-  }
-
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;
+  doc.reserve(256);
   doc["diagSerialEnable"] = g_config.diagSerialEnable;
   doc["diagSerialMask"]   = g_config.diagSerialMask;
 
-  File f = LittleFS.open(TIME_CONFIG_PATH, FILE_WRITE);
+  File f = FlashFS.open(DIAG_SERIAL_CONFIG_PATH, FILE_WRITE);
   if (!f) { xSemaphoreGive(fileSystemMutex); return false; }
-
   serializeJson(doc, f);
   f.close();
 
@@ -372,4 +357,3 @@ bool saveDiagSerialConfigToFS() {
   return true;
 #endif
 }
-

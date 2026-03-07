@@ -1,6 +1,6 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
-
+#include <queue.h>  // For QueueHandle_t
 
 String getContentType(const String& path);
 

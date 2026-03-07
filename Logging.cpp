@@ -24,7 +24,7 @@ struct LogEvent {
   bool     isStart;     // true=START, false=STOP
   DateTime ts;          // timestamp
 };
-
+/*
 // --- MEMORY MONITORING (Teensy Version) ---
 static void memMark(const char* tag) {
   if (!tag) tag = "?";
@@ -32,7 +32,7 @@ static void memMark(const char* tag) {
   // Can use internal RAM checks later.
   LOG_CAT(DBG_MEM, "[%s] Memory Check (Teensy)\n", tag);
 }
-
+*/
 // --- LOGGING QUEUE ---
 extern QueueHandle_t logQueue;
 
