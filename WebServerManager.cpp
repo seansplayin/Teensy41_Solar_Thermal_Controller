@@ -850,7 +850,7 @@ void sendTemperatures(AsyncWebSocketClient* client) {
 // Get formatted time
 String getFormattedTime() {
     DateTime now = getCurrentTimeAtomic();
-    char buffer[9]; // HH:MM:SS
+    char buffer[12]; // HH:MM:SS
     snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
     return String(buffer);
 }
@@ -858,7 +858,7 @@ String getFormattedTime() {
 // Get formatted date
 String getFormattedDate() {
     DateTime now = getCurrentTimeAtomic();
-    char buffer[11]; // YYYY-MM-DD
+    char buffer[16]; // YYYY-MM-DD
     snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", now.year(), now.month(), now.day());
     return String(buffer);
 }
@@ -1305,7 +1305,7 @@ unsigned long aggregateMonthlyLogsReport(int pumpIndex, DateTime currentTime) {
   if (LittleFS.exists(dailyLogFilename.c_str())) {
     File dailyLogFile = LittleFS.open(dailyLogFilename.c_str(), FILE_READ);
     if (dailyLogFile) {
-      char currentMonth[8];
+      char currentMonth[12];
       snprintf(currentMonth, sizeof(currentMonth), "%04d-%02d", currentTime.year(), currentTime.month());
 
       while (dailyLogFile.available()) {

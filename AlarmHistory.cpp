@@ -127,7 +127,8 @@ static bool groupMatches(const Group& g, uint8_t sev, uint16_t code, uint8_t act
   char key[sizeof(g.baseDetail)];
   normalizeDetailForGrouping(detail ? detail : "", key, sizeof(key));
 
-  return (strncmp(g.baseDetail, key, sizeof(g.baseDetail)) == 0);
+  return (strncpy(st.detail, detail, sizeof(st.detail) - 1);
+st.detail[sizeof(st.detail) - 1] = '\0';
 }
 
 static int findGroup(uint8_t sev, uint16_t code, uint8_t action, const char* detail) {
