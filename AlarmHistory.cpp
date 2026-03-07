@@ -259,7 +259,7 @@ static void loadFromFSUnlocked() {
     line[n] = '\0';
     if (n < 10) continue;
 
-    JsonDocument doc(256);
+    DynamicJsonDocument doc(256);
     DeserializationError err = deserializeJson(doc, line);
     if (err) continue;
 
