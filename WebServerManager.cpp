@@ -810,8 +810,8 @@ void sendUpdatedTemperatures() {
 void sendTemperatures(AsyncWebSocketClient* client) {
     String tempData = "Temperatures:";
 
-    // Existing temperatures
-    tempData += "panelT:" + String(panelT) + ",";
+    // System temperatures (mapped from DTemp/DTempAverage or PT1000)
+    tempData += "panelT:" + String(panelT) + ",";          // PT1000-based
     tempData += "CSupplyT:" + String(CSupplyT) + ",";
     tempData += "storageT:" + String(storageT) + ",";
     tempData += "outsideT:" + String(outsideT) + ",";
@@ -828,14 +828,13 @@ void sendTemperatures(AsyncWebSocketClient* client) {
     tempData += "pt1000Current:" + String(pt1000Current) + ",";
     tempData += "pt1000Average:" + String(pt1000Average) + ",";
 
-    // DTemp1 to DTemp13 and their averages
-    for (int i = 0; i < NUM_TEMP_SENSORS; i++) {
+    // DTemp1 to DTemp13 (raw DS18B20)
+    for (int i = 0; i < NUM_DS18B20; i++) {  // Safe: i=0 to 12
         tempData += "DTemp" + String(i + 1) + ":" + String(DTemp[i]) + ",";
-        tempData += "DTempAverage" + String(i + 1) + ":" + String(DTempAverage[i]) + ",";
     }
 
-    // Remove the trailing comma
-    if (tempData.endsWith(",")) {
+    // Remove trailing comma if any data added
+    if (tempData.length() > strlen("Temperatures:")) {
         tempData.remove(tempData.length() - 1);
     }
 
@@ -1006,69 +1005,62 @@ void TaskWebSocketTransmitter(void* pvParameters) {
     }
 }
 
-
 void sendAllData(AsyncWebSocketClient* client) {
-if (client && client->queueIsFull()) {
+    if (client && client->queueIsFull()) {
+        LOG_CAT(DBG_WEB, "[WS] Client queue full, skipping sendAllData.\n");
+        return;
+    }
 
-    LOG_CAT(DBG_WEB, "[WS] Client queue full, skipping sendAllData.\n");
-    return;
-  }
+    sendPumpStatuses(client);
 
-  sendPumpStatuses(client);
+    if (xSemaphoreTake(temperatureMutex, portMAX_DELAY)) {
+        String tempData = "Temperatures:";
 
-  if (xSemaphoreTake(temperatureMutex, portMAX_DELAY)) {
-    String tempData = "Temperatures:";
+        // System temperatures (mapped from DTemp/DTempAverage or PT1000)
+        tempData += "panelT:" + validateTemp(panelT) + ",";
+        tempData += "CSupplyT:" + validateTemp(CSupplyT) + ",";
+        tempData += "storageT:" + validateTemp(storageT) + ",";
+        tempData += "outsideT:" + validateTemp(outsideT) + ",";
+        tempData += "CircReturnT:" + validateTemp(CircReturnT) + ",";
+        tempData += "supplyT:" + validateTemp(supplyT) + ",";
+        tempData += "CreturnT:" + validateTemp(CreturnT) + ",";
+        tempData += "DhwSupplyT:" + validateTemp(DhwSupplyT) + ",";
+        tempData += "DhwReturnT:" + validateTemp(DhwReturnT) + ",";
+        tempData += "HeatingSupplyT:" + validateTemp(HeatingSupplyT) + ",";
+        tempData += "HeatingReturnT:" + validateTemp(HeatingReturnT) + ",";
+        tempData += "dhwT:" + validateTemp(dhwT) + ",";
+        tempData += "PotHeatXinletT:" + validateTemp(PotHeatXinletT) + ",";
+        tempData += "PotHeatXoutletT:" + validateTemp(PotHeatXoutletT) + ",";
+        tempData += "pt1000Current:" + validateTemp(pt1000Current) + ",";
+        tempData += "pt1000Average:" + validateTemp(pt1000Average) + ",";
 
+        // DTemp1-13 and Averages (DS18B20 only)
+        for (int i = 0; i < NUM_DS18B20; i++) {  // Safe: i=0 to 12
+            tempData += "DTemp" + String(i + 1) + ":" + validateTemp(DTemp[i]) + ",";
+            tempData += "DTempAverage" + String(i + 1) + ":" + validateTemp(DTempAverage[i]) + ",";
+        }
 
+        // Memory stats removed (ESP32-only; not for Teensy)
+        tempData += "heapStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
+        tempData += ",psramStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
 
+        // Clean up leading/trailing commas
+        tempData.replace("Temperatures:,", "Temperatures:");
+        if (tempData.length() > strlen("Temperatures:")) {
+            tempData.remove(tempData.length() - 1);  // Remove trailing comma
+            client->text(tempData);
+        } else {
+            LOG_CAT(DBG_WEB, "[Warning] No valid temperature data to broadcast.\n");
+        }
 
-// Build the temperature message
-tempData += "panelT:" + validateTemp(panelT);
-tempData += ",CSupplyT:" + validateTemp(CSupplyT);
-tempData += ",storageT:" + validateTemp(storageT);
-tempData += ",outsideT:" + validateTemp(outsideT);
-tempData += ",CircReturnT:" + validateTemp(CircReturnT);
-tempData += ",supplyT:" + validateTemp(supplyT);
-tempData += ",CreturnT:" + validateTemp(CreturnT);
-tempData += ",DhwSupplyT:" + validateTemp(DhwSupplyT);
-tempData += ",DhwReturnT:" + validateTemp(DhwReturnT);
-tempData += ",HeatingSupplyT:" + validateTemp(HeatingSupplyT);
-tempData += ",HeatingReturnT:" + validateTemp(HeatingReturnT);
-tempData += ",dhwT:" + validateTemp(dhwT);
-tempData += ",PotHeatXinletT:" + validateTemp(PotHeatXinletT);
-tempData += ",PotHeatXoutletT:" + validateTemp(PotHeatXoutletT);
-tempData += ",pt1000Current:" + validateTemp(pt1000Current);
-tempData += ",pt1000Average:" + validateTemp(pt1000Average);
-for (int i = 0; i < NUM_TEMP_SENSORS; i++) {
-tempData += ",DTemp" + String(i + 1) + ":" + validateTemp(DTemp[i]);
-tempData += ",DTempAverage" + String(i + 1) + ":" + validateTemp(DTempAverage[i]);
-}
+        // Release the mutex after operation
+        xSemaphoreGive(temperatureMutex);
+    } else {
+        LOG_CAT(DBG_WEB, "[WS] Failed to take temperatureMutex in sendAllData.\n");
+    }
 
-
-// Memory (PSRAM & HEAP RAM) Reporting for FirstWebpage
-
-
-// Memory stats removed (ESP32-only APIs not available on Teensy 4.1)
-tempData += ",heapStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
-tempData += ",psramStats:{\"freeBytes\":0,\"totalBytes\":0,\"pctUsed\":0}";
-
-
-
-
-tempData.replace("Temperatures:,", "Temperatures:");
-// Check if any temperature is valid
-if (tempData.length() > strlen("Temperatures:")) {
-client->text(tempData);
-} else {
-LOG_CAT(DBG_WEB, "[Warning] No valid temperature data to broadcast.\n");
-}
-// Release the mutex after operation
-xSemaphoreGive(temperatureMutex);
-} else {
-LOG_CAT(DBG_WEB, "[WS] Failed to take temperatureMutex in sendAllData.\n");
-}
-sendDateTime(client);
-sendUptime(client);
+    sendDateTime(client);
+    sendUptime(client);
 }
 
 

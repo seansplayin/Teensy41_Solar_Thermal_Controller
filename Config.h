@@ -114,6 +114,8 @@ inline constexpr uint8_t DEFAULT_LineFreezeRunMin        = 3;
 inline constexpr uint8_t DEFAULT_LINE_FREEZE_SENSORS[15] = {3,4,0}; // example
 
 #define NUM_TEMP_SENSORS 14
+const int NUM_DS18B20 = 13;  // Number of DS18B20 sensors (DTemp/DTempAverage arrays size)
+const int NUM_PT1000 = 1;    // Number of PT1000 sensors (for completeness, though usually fixed)
 
 extern const char* SENSOR_NAMES[15];
 extern const char* SENSOR_FILE_NAMES[15];
