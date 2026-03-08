@@ -67,19 +67,7 @@ constexpr int RECIRC_VALVE_RELAY    = 25;
 constexpr int Pump_9_Unused_Relay   = 28;
 constexpr int Pump_10_Unused_Relay  = 29;
 
-// Pump pin array (used by PumpManager)
-constexpr int pumpPins[10] = {
-    PANEL_LEAD_PUMP_RELAY,   // 0
-    PANEL_LAG_PUMP_RELAY,    // 1
-    HEAT_TAPE_RELAY,         // 2
-    CIRC_PUMP_RELAY,         // 3
-    DHW_PUMP_RELAY,          // 4
-    STORAGE_HEAT_RELAY,      // 5
-    BOILER_CIRC_RELAY,       // 6
-    RECIRC_VALVE_RELAY,      // 7
-    Pump_9_Unused_Relay,     // 8
-    Pump_10_Unused_Relay     // 9
-};
+
 
 #define PUMP_OFF  0
 #define PUMP_ON   1
@@ -87,7 +75,8 @@ constexpr int pumpPins[10] = {
 
 extern int pumpModes[10];
 extern int pumpStates[10];
-const int numPumps = 10;
+extern const int numPumps;
+extern const int pumpPins[];
 
 
 // ====================== PARAMETERS ======================

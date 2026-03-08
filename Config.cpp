@@ -10,6 +10,22 @@
 
 const size_t JSON_BUFFER_SIZE = 4096; // or larger if needed
 
+const int numPumps = 10;
+
+// Pump pin array (used by PumpManager)
+constexpr int pumpPins[10] = {
+    PANEL_LEAD_PUMP_RELAY,   // 0
+    PANEL_LAG_PUMP_RELAY,    // 1
+    HEAT_TAPE_RELAY,         // 2
+    CIRC_PUMP_RELAY,         // 3
+    DHW_PUMP_RELAY,          // 4
+    STORAGE_HEAT_RELAY,      // 5
+    BOILER_CIRC_RELAY,       // 6
+    RECIRC_VALVE_RELAY,      // 7
+    Pump_9_Unused_Relay,     // 8
+    Pump_10_Unused_Relay     // 9
+};
+
 extern float panelT;           
 extern float CSupplyT;         
 extern float storageT;         

@@ -20,7 +20,7 @@ using namespace arduino;
 // Define the mutex handles
 SemaphoreHandle_t pumpStateMutex = NULL;
 
-// pumpPins defined in Config.h
+// pumpPins defined in Config.
 extern const int pumpPins[];  
 
 bool previousDHWCallStatus = false;
