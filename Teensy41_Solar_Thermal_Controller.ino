@@ -33,8 +33,8 @@
 using namespace qindesign::network;
 
 
-String g_tempWsPayload = "";
-volatile bool g_sendTemperatures = false;
+extern String g_tempWsPayload;
+extern volatile bool g_sendTemperatures;
 
 // --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {
