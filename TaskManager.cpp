@@ -39,6 +39,10 @@ bool flagZeroLengthTime = false;
 bool flagZeroLengthPumpState = false;
 bool flagZeroLengthTemperatures = false;
 
+// Temperature broadcast telemetry counters
+volatile uint32_t g_tempBcastCalled = 0;
+volatile uint32_t g_tempBcastSkipped = 0;
+
 
 // Task Handles
 TaskHandle_t thPumpControl = NULL;
@@ -129,8 +133,8 @@ void startAllTasks() {
   logQueue = xQueueCreate(20, sizeof(LogEvent));
   Serial.println(logQueue ? "[StartAllTasks] logQueue created" : "[StartAllTasks] logQueue create FAILED");
 
-  // Note: No "PinnedToCore" on Teensy
-    // Note: No "PinnedToCore" on Teensy
+
+ 
   Serial.println("[StartAllTasks] Creating TaskNetworkPump");
   xTaskCreate(TaskNetworkPump, "NetPump", 3072, NULL, 2, NULL);
 

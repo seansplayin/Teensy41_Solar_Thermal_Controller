@@ -33,6 +33,10 @@ using namespace qindesign::network;
 extern String g_tempWsPayload;
 extern volatile bool g_sendTemperatures;
 
+// Static storage for the main controller task so it does not consume heap
+static StaticTask_t g_mainCtrlTcb;
+static StackType_t  g_mainCtrlStack[512];
+
 // --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {
   
@@ -61,21 +65,22 @@ static void TaskControllerMain(void* pvParameters) {
   Serial.println("[Boot] Initializing PT1000...");
   initPT1000Sensor();
 
-  Serial.println("[Boot] Initializing DS18B20...");
+    Serial.println("[Boot] Initializing DS18B20...");
   initDS18B20Sensors();
 
   Serial.println("[Boot] Initializing pumps...");
   initializePumps();
   
-    // 3. Start Network & Web
+  // 3. Start Network & Web
+  Serial.println("[Boot] Calling setupNetwork()...");
   setupNetwork(); // network + HTTP routes + server begin
+  Serial.println("[Boot] setupNetwork() returned");
 
   // 4. Start Tasks
-  Serial.println("[System] Starting application tasks");
-  startAllTasks();
-
+  Serial.println("[System] Skipping Application Tasks for HTTP isolation test");
   for (;;) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+      serviceNetwork();
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 
 }
@@ -85,12 +90,25 @@ void setup() {
   Serial.begin(115200);
   while (!Serial && millis() < 4000);
 
-  Serial.println("--- TEENSY 4.1 SOLAR CONTROLLER STARTING ---");
+        Serial.println("--- TEENSY 4.1 SOLAR CONTROLLER STARTING ---");
   Serial.println("[Boot] setup() reached");
   Serial.println("[Boot] Filesystem init will run inside TaskControllerMain()");
 
-  // Create the main task
-  xTaskCreate(TaskControllerMain, "MainCtrl", 8192, NULL, 1, NULL);
+  // Create the main task using static storage so it does not consume heap
+  TaskHandle_t mainTaskHandle = xTaskCreateStatic(
+    TaskControllerMain,
+    "MainCtrl",
+    sizeof(g_mainCtrlStack) / sizeof(g_mainCtrlStack[0]),
+    NULL,
+    1,
+    g_mainCtrlStack,
+    &g_mainCtrlTcb
+  );
+
+  if (mainTaskHandle == NULL) {
+    Serial.println("[ERR] xTaskCreateStatic(TaskControllerMain) FAILED");
+    for (;;) { delay(1000); }
+  }
 
   // Start Scheduler
   vTaskStartScheduler();

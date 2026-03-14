@@ -1741,6 +1741,85 @@ const char firstPageHtml[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
+
+
+
+
+
+ 
+static String buildFirstPageMiniHtml() {
+  String html;
+  html.reserve(512);
+  html += "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>FirstPage Mini</title></head><body>";
+  html += "<h1>FirstPage Mini</h1>";
+  html += "<p>Version: ";
+  html += VERSION_INFO;
+  html += "</p>";
+  html += "<p>Unix Time: ";
+  html += String(millis());
+  html += "</p>";
+  html += "</body></html>";
+  return html;
+}
+
+static String buildFirstPageMidiHtml() {
+  String html;
+  html.reserve(6000);
+
+  html += "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">";
+  html += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+  html += "<title>FirstPage Midi</title>";
+  html += "<style>";
+  html += "body{font-family:Arial,sans-serif;margin:12px;color:#222;}";
+  html += "h1{color:purple;margin:0 0 8px 0;}";
+  html += ".row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}";
+  html += ".card{border:1px solid #999;border-radius:6px;padding:10px;min-width:260px;}";
+  html += ".label{font-weight:bold;color:#459;}";
+  html += ".value{color:#000;}";
+  html += ".btn{display:inline-block;padding:6px 10px;border:1px solid blue;color:blue;text-decoration:none;border-radius:4px;margin-right:6px;}";
+  html += "</style></head><body>";
+
+  html += "<h1>Solar Control System</h1>";
+  html += "<p><span class=\"label\">Version:</span> <span class=\"value\">";
+  html += VERSION_INFO;
+  html += "</span></p>";
+
+  html += "<div class=\"row\">";
+
+  html += "<div class=\"card\"><div class=\"label\">Status</div>";
+  html += "<p>HTTP isolation test page</p>";
+  html += "<p>Unix Time: ";
+  html += String(millis());
+  html += "</p></div>";
+
+  html += "<div class=\"card\"><div class=\"label\">Pump Overview</div>";
+  html += "<p>Pump 1: OFF</p><p>Pump 2: OFF</p><p>Pump 3: OFF</p>";
+  html += "</div>";
+
+  html += "<div class=\"card\"><div class=\"label\">Temperature Overview</div>";
+  html += "<p>Collector: --</p><p>Storage: --</p><p>Outside: --</p>";
+  html += "</div>";
+
+  html += "</div>";
+
+  html += "<div class=\"row\">";
+  html += "<div class=\"card\"><div class=\"label\">Navigation</div>";
+  html += "<a class=\"btn\" href=\"/\">Root</a>";
+  html += "<a class=\"btn\" href=\"/ping\">Ping</a>";
+  html += "<a class=\"btn\" href=\"/firstpage-mini\">Mini</a>";
+  html += "<a class=\"btn\" href=\"/firstpage-midi\">Midi</a>";
+  html += "</div>";
+
+  html += "<div class=\"card\"><div class=\"label\">Notes</div>";
+  html += "<p>This is a mid-sized HTML test page intended to be much larger than the mini page but much smaller than the full first page.</p>";
+  html += "<p>If this page works but the full first page crashes, the monolithic full-page send path is the problem.</p>";
+  html += "</div>";
+  html += "</div>";
+
+  html += "</body></html>";
+  return html;
+}
+
 String processor(const String& var) {
   if (var == "VERSION_INFO") {
     return VERSION_INFO;
@@ -1752,7 +1831,19 @@ String processor(const String& var) {
 }
 
 void setupFirstPageRoutes() {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/html; charset=UTF-8", firstPageHtml, processor);
+  server.on("/firstpage-mini", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP] GET /firstpage-mini");
+    request->send(200, "text/html; charset=UTF-8", buildFirstPageMiniHtml());
+  });
+
+  server.on("/firstpage-midi", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP] GET /firstpage-midi");
+    request->send(200, "text/html; charset=UTF-8", buildFirstPageMidiHtml());
+  });
+
+    server.on("/firstpage-test", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP] GET /firstpage-test");
+    request->send(200, "text/plain; charset=UTF-8",
+                  "firstPageHtml is disabled on Teensy during staged rebuild");
   });
 }

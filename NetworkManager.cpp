@@ -5,18 +5,48 @@
 #include <QNEthernet.h>
 #include "AlarmWebpage.h"
 #include "FirstWebpage.h"
-#include "SecondWebpage.h"
-#include "ThirdWebpage.h"
 
 using namespace qindesign::network;
 
 // Explicit route-registration declarations
 void setupAlarmRoutes();
 void setupFirstPageRoutes();
-void setupSecondPageRoutes();
-void setupThirdPageRoutes();
 
 static bool s_networkConnected = false;
+static bool s_ethernetStarted  = false;
+static bool s_serverStarted    = false;
+static uint32_t s_lastStatusMs = 0;
+static bool s_reportedNoLink   = false;
+static bool s_reportedWaiting  = false;
+
+static void startHttpServerOnce() {
+  if (s_serverStarted) return;
+
+  // Minimal root test route
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP] GET /");
+    request->send(200, "text/plain", "root-ok");
+  });
+
+  // Minimal ping test route
+  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
+    Serial.println("[HTTP] GET /ping");
+    request->send(200, "text/plain", "ok");
+  });
+
+  // Register isolated FirstWebpage test routes on non-root URLs
+  setupFirstPageRoutes();
+
+  server.onNotFound([](AsyncWebServerRequest *request) {
+    Serial.print("[HTTP] 404 ");
+    Serial.println(request->url());
+    request->send(404, "text/plain", "Not found");
+  });
+
+  server.begin();
+  s_serverStarted = true;
+  Serial.println("[Network] AsyncWebServer started on port 80");
+}
 
 bool isNetworkConnected() {
   return s_networkConnected && (Ethernet.localIP() != IPAddress(0, 0, 0, 0));
@@ -27,83 +57,77 @@ void setupNetwork() {
 
   Ethernet.setHostname("teensy41-solar");
 
-  // Give the PHY / switch a brief moment before starting DHCP
-  delay(250);
+    if (!s_ethernetStarted) {
+    const IPAddress kStaticIP(10, 20, 90, 39);
+    const IPAddress kNetmask(255, 255, 255, 0);
+    const IPAddress kGateway(10, 20, 90, 1);
+    const IPAddress kDNS(10, 20, 90, 1);
 
-  bool started = Ethernet.begin();   // DHCP-enabled startup
-  if (!started) {
-    Serial.println("[Network] Ethernet.begin() failed!");
-    s_networkConnected = false;
-    return;
-  }
-
-  Serial.println("[Network] Waiting for DHCP / link...");
-
-  unsigned long start = millis();
-  bool sawLinkUp = false;
-
-  while (millis() - start < 10000) {
-    if (Ethernet.linkStatus() == LinkON) {
-      sawLinkUp = true;
+    bool started = Ethernet.begin(kStaticIP, kNetmask, kGateway, kDNS);
+    if (!started) {
+      Serial.println("[Network] Ethernet.begin(static) failed!");
+      s_networkConnected = false;
+      return;
     }
 
-    if (Ethernet.localIP() != IPAddress(0, 0, 0, 0)) {
-      break;
-    }
+    s_ethernetStarted = true;
 
-    delay(100);
+    Serial.print("[Network] Static IP requested: ");
+    Serial.println(kStaticIP);
   }
 
-  if (Ethernet.localIP() != IPAddress(0, 0, 0, 0)) {
-    s_networkConnected = true;
-
-    Serial.print("[Network] Connected! IP: ");
-    Serial.println(Ethernet.localIP());
-
-    Serial.print("[Network] Gateway: ");
-    Serial.println(Ethernet.gatewayIP());
-
-    Serial.print("[Network] Subnet: ");
-    Serial.println(Ethernet.subnetMask());
-    } else {
-    s_networkConnected = false;
-
-    if (sawLinkUp || Ethernet.linkStatus() == LinkON) {
-      Serial.println("[Network] DHCP failed, but link appears up.");
-    } else {
-      Serial.println("[Network] Cable disconnected.");
-    }
-    return;
-  }
-
-  initWebSocket();
-
-  // Minimal debug route
-  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("[HTTP] GET /ping");
-    request->send(200, "text/plain", "ok");
-  });
-
-  server.onNotFound([](AsyncWebServerRequest *request) {
-    Serial.print("[HTTP] 404 ");
-    Serial.println(request->url());
-    request->send(404, "text/plain", "Not found");
-  });
-
-  setupAlarmRoutes();
-  setupFirstPageRoutes();
-  setupSecondPageRoutes();
-  setupThirdPageRoutes();
-
-  server.begin();
-  Serial.println("[Network] AsyncWebServer started on port 80");
-  unsigned long waitStart = millis();
-  while (millis() - waitStart < 10000) {
-  Ethernet.loop();   // keep network stack alive
-  delay(1);
+  Serial.println("[Network] Waiting for link / static IP...");
+  s_lastStatusMs = millis();
 }
 
-Serial.println("[Network] Continuing boot...");
+void serviceNetwork() {
+  if (!s_ethernetStarted) return;
 
+  Ethernet.loop();
 
+  const bool linkOn = (Ethernet.linkStatus() == LinkON);
+  const IPAddress ip = Ethernet.localIP();
+  const uint32_t now = millis();
+
+  // Do not treat a non-zero static IP as "connected" unless the physical link is up.
+  if (!linkOn) {
+    s_networkConnected = false;
+
+    if (!s_reportedNoLink) {
+      Serial.println("[Network] Cable disconnected.");
+      s_reportedNoLink = true;
+      s_reportedWaiting = false;
+    }
+    return;
+  }
+
+  s_reportedNoLink = false;
+
+  if (ip != IPAddress(0, 0, 0, 0)) {
+    if (!s_networkConnected) {
+      s_networkConnected = true;
+
+      Serial.print("[Network] Connected! IP: ");
+      Serial.println(ip);
+
+      Serial.print("[Network] Gateway: ");
+      Serial.println(Ethernet.gatewayIP());
+
+      Serial.print("[Network] Subnet: ");
+      Serial.println(Ethernet.subnetMask());
+
+      s_reportedWaiting = false;
+    }
+
+    startHttpServerOnce();
+    return;
+  }
+
+  s_networkConnected = false;
+
+  if (!s_reportedWaiting || (now - s_lastStatusMs >= 1000)) {
+    Serial.println("[Network] Link is up, waiting for static IP...");
+    s_reportedWaiting = true;
+    s_lastStatusMs = now;
+  }
 }

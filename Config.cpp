@@ -44,6 +44,42 @@ extern float pt1000Average;
 
 extern float DTempAverage[13];  // Assuming DTempAverage[0..12] for 1-13
 
+const char* SENSOR_NAMES[15] = {
+  "",
+  "Panel Manifold Temperature (PT1000)",
+  "Collector Supply Temperature (DTemp1)",
+  "600 Gal Storage Tank Temperature (DTemp2)",
+  "Outside Ambient Temperature (DTemp3)",
+  "Circ Loop Return Temperature (DTemp5)",
+  "Circ Loop Supply Temperature (DTemp4)",
+  "Collector Return Temperature (DTemp6)",
+  "DHW Glycol Supply Temperature (DTemp7)",
+  "DHW Glycol Return Temperature (DTemp8)",
+  "Furnace Glycol Supply Temperature (DTemp9)",
+  "Furnace Glycol Return Temperature (DTemp10)",
+  "Potable Inline Heater Outlet (DTemp11)",
+  "Potable Heat Exchanger Inlet (DTemp12)",
+  "Potable Heat Exchanger Outlet (DTemp13)"
+};
+
+const char* SENSOR_FILE_NAMES[15] = {
+  "",
+  "panelT",
+  "CSupplyT",
+  "storageT",
+  "outsideT",
+  "CircReturnT",
+  "supplyT",
+  "CreturnT",
+  "DhwSupplyT",
+  "DhwReturnT",
+  "HeatingSupplyT",
+  "HeatingReturnT",
+  "dhwT",
+  "PotHeatXinletT",
+  "PotHeatXoutletT"
+};
+
 SystemConfig g_config;
 TimeConfig g_timeConfig;
 
