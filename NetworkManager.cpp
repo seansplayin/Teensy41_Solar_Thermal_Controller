@@ -5,12 +5,16 @@
 #include <QNEthernet.h>
 #include "AlarmWebpage.h"
 #include "FirstWebpage.h"
+#include "SecondWebpage.h"
+#include "ThirdWebpage.h"
 
 using namespace qindesign::network;
 
 // Explicit route-registration declarations
 void setupAlarmRoutes();
 void setupFirstPageRoutes();
+void setupSecondPageRoutes();
+void setupThirdPageRoutes();
 
 static bool s_networkConnected = false;
 
@@ -61,7 +65,7 @@ void setupNetwork() {
 
     Serial.print("[Network] Subnet: ");
     Serial.println(Ethernet.subnetMask());
-  } else {
+    } else {
     s_networkConnected = false;
 
     if (sawLinkUp || Ethernet.linkStatus() == LinkON) {
@@ -71,20 +75,14 @@ void setupNetwork() {
     }
     return;
   }
-//startServer();
 
-    // Minimal debug routes
+  initWebSocket();
+
+  // Minimal debug route
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("[HTTP] GET /ping");
     request->send(200, "text/plain", "ok");
   });
-
-/*
-  server.on("/root-test", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("[HTTP] GET /root-test");
-    request->send(200, "text/plain", "root-test-ok");
-  });
-*/
 
   server.onNotFound([](AsyncWebServerRequest *request) {
     Serial.print("[HTTP] 404 ");
@@ -94,6 +92,8 @@ void setupNetwork() {
 
   setupAlarmRoutes();
   setupFirstPageRoutes();
+  setupSecondPageRoutes();
+  setupThirdPageRoutes();
 
   server.begin();
   Serial.println("[Network] AsyncWebServer started on port 80");

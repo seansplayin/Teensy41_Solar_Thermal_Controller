@@ -67,14 +67,15 @@ static void TaskControllerMain(void* pvParameters) {
   Serial.println("[Boot] Initializing pumps...");
   initializePumps();
   
-  // 3. Start Network & Web
+    // 3. Start Network & Web
   setupNetwork(); // network + HTTP routes + server begin
 
   // 4. Start Tasks
-  Serial.println("[System] Skipping Application Tasks for HTTP isolation test");
+  Serial.println("[System] Starting application tasks");
+  startAllTasks();
+
   for (;;) {
-    qindesign::network::Ethernet.loop();
-    vTaskDelay(pdMS_TO_TICKS(1));
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 
 }

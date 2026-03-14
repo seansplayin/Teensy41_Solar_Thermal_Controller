@@ -24,6 +24,7 @@
 #include "MemoryStats.h"
 //#include "TarGZ.h"
 #include "DiagLog.h"
+#include "WebServerManager.h"
 #include <QNEthernet.h>
 
 QueueHandle_t logQueue = nullptr;
@@ -139,11 +140,14 @@ void startAllTasks() {
   Serial.println("[StartAllTasks] Creating TaskPumpControl");
   xTaskCreate(TaskPumpControl, "PumpControl", 4096, NULL, 4, &thPumpControl);
 
-  Serial.println("[StartAllTasks] Creating TaskTemperatureLogging");
+    Serial.println("[StartAllTasks] Creating TaskTemperatureLogging");
   xTaskCreate(TaskTemperatureLogging, "TempLog", 4096, NULL, 1, &thTemperatureLogging);
 
   Serial.println("[StartAllTasks] Creating TaskUpdateTemperatures");
   xTaskCreate(TaskUpdateTemperatures, "UpdateTemps", 4096, NULL, 3, &thUpdateTemps);
+
+  Serial.println("[StartAllTasks] Creating TaskWebSocketTransmitter");
+  xTaskCreate(TaskWebSocketTransmitter, "WsTx", 4096, NULL, 2, NULL);
 
   Serial.println("[StartAllTasks] Calling AlarmHistory_begin()");
 

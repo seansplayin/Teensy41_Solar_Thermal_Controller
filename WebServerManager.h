@@ -11,4 +11,6 @@ extern AsyncWebSocket ws;
 void WebServerManager_begin();
 String getContentType(const String& path);
 void startServer();
+void initWebSocket();
+void TaskWebSocketTransmitter(void* pvParameters);
 #endif
