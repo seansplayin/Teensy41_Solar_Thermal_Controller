@@ -10,6 +10,9 @@ extern AsyncWebSocket ws;
 // Add these prototypes (fixes undeclared functions)
 void WebServerManager_begin();
 String getContentType(const String& path);
+void serveStaticAssets(AsyncWebServer& server);
+void serveFavicon(AsyncWebServer& server);
+void setupRoutes();
 void startServer();
 void initWebSocket();
 void TaskWebSocketTransmitter(void* pvParameters);

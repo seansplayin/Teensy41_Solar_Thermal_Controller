@@ -1762,61 +1762,807 @@ static String buildFirstPageMiniHtml() {
   return html;
 }
 
+static String buildMidiHeadAndOpenTable() {
+  return R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon.png">
+  <title>Solar Control System</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style type="text/css">
+    /* --- Layout stability --- */
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 5px; /* mimic cellspacing */
+    }
+    td { vertical-align: top; min-width: 320px; }
+
+    h1{
+      color:purple;
+      font-size:40px;
+      line-height:1.05;
+      font-weight:bold;
+      margin: 0;
+      padding: 0;
+      }
+    h2{
+      color:#459;
+      font-size:12px;
+      line-height:1.0;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h3{
+      color:#459;
+      font-size:30px;
+      line-height:1.0;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h4{
+      color:purple;
+      font-size:11px;
+      line-height:1.0;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h5{
+      color:purple;
+      font-size:11px;
+      line-height:1.0;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h6{
+      color:purple;
+      font-size:12px;
+      line-height:1.05;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h7{
+      color:#459;
+      font-size:11px;
+      line-height:0.5;
+      font-weight:bold;
+      text-align:left;
+      margin: 0;
+      padding: 0;
+    }
+    h8{
+      color:purple;
+      font-size:14px;
+      line-height:1.0;
+      font-weight:bold;
+      text-align:center;
+      margin: 0;
+      padding: 0;
+    }
+    h9{
+      color:#000000;
+      font-size:14px;
+      line-height:1.0;
+      text-align:left;
+      margin: 0;
+      padding: 0;
+    }
+    h10{
+      color:#000000;
+      font-size:14px;
+      line-height:1.0;
+      text-align:right;
+      margin: 0;
+      padding: 0;
+    }
+
+    body{
+      font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif, Helvetica;
+      font-size:14px;
+      line-height:1.0;
+      text-align:left;
+      box-sizing: border-box;
+    }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    .pump {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: purple;
+      flex-wrap: nowrap;
+    }
+    .pump-title {
+      flex: 1 1 auto;
+      text-align: left;
+      margin-left: 10px;
+      color: purple;
+      white-space: nowrap;
+    }
+    .pump-mode {
+      align-items: right;
+      justify-content: flex-start;
+      padding-right: 20px;
+      flex-wrap: nowrap;
+    }
+    .pump-mode label { margin-right: 1px; }
+    .pump-state {
+      flex: 0 0 auto;
+      text-align: right;
+      margin-right: 10px;
+      color: purple;
+    }
+    .pump select {
+      margin-left: 5px;
+      background-color: white;
+      color: blue;
+    }
+    .pump select:hover { background-color: darkblue; }
+    .pump select:focus {
+      outline: 2px solid rgba(0,0,255,0.6);
+      outline-offset: 2px;
+    }
+
+    .blue-button {
+      background-color: white;
+      color: blue;
+      padding: 0px 4px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid blue;
+      border-radius: 3px;
+    }
+    .blue-button:hover { background-color: darkblue; color:white; }
+    .blue-button:focus {
+      outline: 2px solid rgba(0,0,255,0.6);
+      outline-offset: 2px;
+    }
+
+    #alarmLogBtn {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      margin: 0;
+    }
+
+    /* --- System Configuration cell: anchor config buttons bottom-left --- */
+    #configCell { position: relative; }
+    #configCell .configContent { padding-bottom: 24px; }
+    #configButtons {
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+    }
+    #configButtons .blue-button { margin-right: 4px; }
+
+    #timeInfoView .timeRows {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: bold;
+      color: purple;
+      text-align: center;
+    }
+    #timeInfoView .dualRow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    #timeInfoView .dualRow > span:first-child { text-align: left;  flex: 1 1 0; }
+    #timeInfoView .dualRow > span:last-child  { text-align: right; flex: 1 1 0; }
+
+    #timeCell { position: relative; }
+    #timeCell .timeContent { padding-bottom: 26px; }
+    #editTimeConfigBtn {
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      margin: 0;
+    }
+
+    #statusCell {
+      position: relative;
+      padding: 4px 4px 26px 4px;
+    }
+    #statusCell .statusRows {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+      font-size: 11px;
+      font-weight: bold;
+      color: purple;
+      text-align: right;
+    }
+
+    .pump-state .on {
+      color: blue !important;
+      font-weight: bold !important;
+      background-color: #e6f3ff !important;
+      border-radius: 3px;
+    }
+    .pump-state .off {
+      color: black !important;
+      font-weight: normal !important;
+      background: none !important;
+    }
+
+    #heatingCalls p { color: purple; font-size: 14px; }
+    #heatingCalls span { font-weight: normal; }
+
+    #TemperatureValues {
+      font-size: 14px;
+      color: #000000;
+    }
+
+    #SectionHeader {
+      font-size: 14px;
+      color: #000000;
+      line-height: 0.5;
+      margin: 0;
+      padding-top: 2px;
+      justify-content: center;
+    }
+
+    .alarm-active { color:red !important; font-weight:bold; }
+
+    /* blink WITHOUT percent keyframes (avoids template parser weirdness) */
+    .alarm-blink { animation: blinker 1s steps(2, start) infinite; }
+    @keyframes blinker { to { visibility: hidden; } }
+
+    .sensor-list { display: none; margin-top: 10px; }
+    .sensor-item { display: block; margin-bottom: 5px; }
+    .sensor-item input[type="checkbox"] { margin-right: 5px; }
+
+    .temp-item {
+      font-size: 14px;
+      color: #000000;
+      line-height: 1.0;
+    }
+
+    #collectorFreezeSensors, #lineFreezeSensors{
+  display:inline;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+
+   /* ==========================================================
+   ✅ IFRAME CONTAINERS (stable + never escape)
+   ========================================================== */
+.scaledFrame{
+  position: relative;   /* CRITICAL: makes absolute iframe stay in this box */
+  width: 100%;
+  overflow: hidden;
+  background: white;
+}
+
+/* iframe is positioned by JS (left/top), scaled by JS */
+.scaledFrame iframe{
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  display: block;
+  transform-origin: 0 0;  /* scale from top-left */
+  background: white;
+}
+
+/* ✅ Iframe Heights for Pump Runtimes and Temperature Logs 
+#pumpRuntimesContainer { height: 560px; min-height: 560px; }
+#tempLogsContainer     { height: 560px; min-height: 560px; }*/
+/* JS will set the height dynamically */
+#pumpRuntimesContainer { height: auto; min-height: 200px; }
+#tempLogsContainer     { height: auto; min-height: 200px; }
+
+
+/* ✅ Call status (left) + Set All Pumps (right) in 2 compact rows */
+#callAndGlobal {
+  display: grid;
+  grid-template-columns: 1fr auto;   /* left text grows, right controls stay tight */
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: center;
+}
+
+#callAndGlobal .callRow {
+  color: purple;
+  font-size: 14px;
+  line-height: 1.0;
+  white-space: nowrap;
+}
+
+#callAndGlobal .globalLabel {
+  color: purple;
+  font-size: 14px;
+  font-weight: bold;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+#callAndGlobal .globalButtons {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+#callAndGlobal .globalButtons .blue-button {
+  margin-left: 6px;
+}
+
+#pumps {
+  margin-top: 8px;
+}
+
+  </style>
+</head>
+
+<body>
+  <table border="10" cellpadding="4" cellspacing="5" bgcolor="white">
+    <tr>
+
+)rawliteral";
+}
+
+static String buildMidiRow1Col1() {
+  return R"rawliteral(
+<body>
+  <table border="10" cellpadding="4" cellspacing="5" bgcolor="white">
+    <tr>
+      <td valign="top" align="left" bgcolor="white" id="timeCell">
+
+        <!-- View mode for time/date/uptime + timezone/DST -->
+        <div id="timeInfoView" class="timeContent">
+          <div class="timeRows">
+            <div class="dualRow">
+              <span>Current time: <span id="currentTime" style="color:blue">--:--</span></span>
+              <span>Date: <span id="currentDate" style="color:blue">--</span></span>
+            </div>
+
+            <div>Uptime: <span id="uptime" style="color:blue">--</span></div>
+            <div>Time Zone: <span id="timeZoneDisplay" style="color:blue">--</span></div>
+            <div>Daylight Saving: <span id="dstEnabledDisplay" style="color:blue">--</span></div>
+          </div>
+
+          <button id="editTimeConfigBtn" class="blue-button">Edit Time Config</button>
+        </div>
+
+        <!-- Edit mode panel for time configuration -->
+        <div id="timeConfigEditor" style="display:none;">
+          <div class="timeRows">
+            <div><strong>Time Configuration</strong></div>
+
+            <div>
+              Time Zone:
+              <select id="timeZoneSelect">
+                <option value="UTC">UTC</option>
+                <option value="US_PACIFIC">US Pacific (PST/PDT)</option>
+                <option value="US_MOUNTAIN">US Mountain (MST/MDT)</option>
+                <option value="US_CENTRAL">US Central (CST/CDT)</option>
+                <option value="US_EASTERN">US Eastern (EST/EDT)</option>
+              </select>
+            </div>
+
+            <div>
+              Daylight Saving:
+              <select id="dstEnabledSelect">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+
+            <div>
+              <button id="saveTimeConfigBtn"   class="blue-button">Save</button>
+              <button id="cancelTimeConfigBtn" class="blue-button">Cancel</button>
+              <button id="resetTimeConfigBtn"  class="blue-button">Restore Defaults</button>
+            </div>
+          </div>
+        </div>
+
+      </td>
+
+)rawliteral";
+}
+
+static String buildMidiRow1Col2() {
+  return R"rawliteral(
+<td valign="top" align="center" bgcolor="white">
+        <div><h1>Solar Thermal</h1></div>
+        <div><h1>System Controller</h1></div>
+        <div><h6>Thermal Collection & Distribution with logging</h6></div>
+      </td>
+)rawliteral";
+}
+
+static String buildMidiRow1Col3() {
+  return R"rawliteral(
+<td valign="top" align="center" bgcolor="white" id="statusCell">
+        <div class="statusRows">
+          <div>Alarm state = <span id="alarmState" style="color:blue;">OK</span></div>
+          <div>Version = <span style="color:blue">%VERSION_INFO%</span></div>
+          <div>Heap (Internal RAM): <span id="heapUsage" style="color:blue">--</span></div>
+          <div>PSRAM: <span id="psramUsage" style="color:blue">--</span></div>
+          <div>File System (Flash Storeage): <span id="fsUsage" style="color:blue">--</span></div>
+
+        </div>
+
+        <button id="alarmLogBtn" class="blue-button">Alarm Log</button>
+      </td>
+)rawliteral";
+}
+
+static String buildMidiRow2Col1() {
+  return R"rawliteral(
+<td valign="top" id="configCell">
+      <div id="SectionHeader" class="configContent">      
+        <h3>System Temperatures</h3>
+        <h2>Outside Temperatures</h2>
+
+        <p class="temp-item">Outside Ambient (DTemp3Average): <span id="outsideT">--</span></p>
+        <p class="temp-item">600 Gal Storage (DTemp2Average): <span id="storageT">--</span></p>
+        <p class="temp-item">Collector Manifold (PT1000Average): <span id="panelT">--</span></p>
+        <p class="temp-item">Collector Supply (DTemp1Average): <span id="CSupplyT">--</span></p>
+        <p class="temp-item">Collector Return (DTemp6Average): <span id="CreturnT">--</span></p>
+        <p class="temp-item">Circ Loop Supply (DTemp4Average): <span id="supplyT">--</span></p>
+        <p class="temp-item">Circ Loop Return (DTemp5Average): <span id="CircReturnT">--</span></p>
+
+        <br>
+        <h2>Inside Temperatures</h2>
+
+        <p class="temp-item">DHW Glycol Supply (DTemp7Average): <span id="DhwSupplyT">--</span></p>
+        <p class="temp-item">DHW Glycol Return (DTemp8Average): <span id="DhwReturnT">--</span></p>
+        <p class="temp-item">Furance Glycol Loop Supply (DTemp9Average): <span id="HeatingSupplyT">--</span></p>
+        <p class="temp-item">Furance Glycol Loop Return (DTemp10Average): <span id="HeatingReturnT">--</span></p>
+        <p class="temp-item">DHW Pot EXCH In (DTemp12Average): <span id="PotHeatXinletT">--</span></p>
+        <p class="temp-item">DHW Pot EXCH Out (DTemp13Average): <span id="PotHeatXoutletT">--</span></p>
+        <p class="temp-item">DHW Pot Inline heater Out (DTemp11Average): <span id="dhwT">--</span></p>
+        </div>
+      </td>
+)rawliteral";
+}
+
+static String buildMidiRow2Col2() {
+  return R"rawliteral(
+<td valign="top" id="configCell">
+      <div id="SectionHeader" class="configContent">
+        <h3>Relay Status & Control</h3>
+        <h2>Pumps, Valves, Heat Tape</h2>
+
+        <div id="heatingCalls" style="margin-top:12px;">
+
+        <div id="callAndGlobal">
+        <div class="callRow">Call for DHW Heating: <span id="dhwHeatingCallStatus">--</span></div>
+        <div class="globalLabel">Set All Pumps:</div>
+
+        <div class="callRow">Call for Heating: <span id="heatingCallStatus">--</span></div>
+        <div class="globalButtons">
+        <button id="allAutoButton" class="blue-button">AUTO</button>
+        <button id="allOffButton"  class="blue-button">OFF</button>
+        </div>
+      </div>
+      </div>
+
+  <div id="pumps">
+    <!-- Pump controls will be generated by JavaScript -->
+  </div>
+
+</div>
+
+      </td>
+)rawliteral";
+}
+
+static String buildMidiRow2Col3() {
+  return R"rawliteral(
+<td valign="top" bgcolor="white" align="center">
+  <div class="scaledFrame" id="pumpRuntimesContainer">
+    <iframe src="/second-page" id="pumpRuntimesIframe" scrolling="no"></iframe>
+  </div>
+</td>
+)rawliteral";
+}
+
+static String buildMidiRow3Col1() {
+  return R"rawliteral(
+<td valign="top" id="configCell">
+        <div id="SectionHeader">
+          <h3>Temperature Values</h3>
+
+          <p class="temp-item">pt1000Current: <span id="pt1000Current">--</span>  pt1000Average: <span id="pt1000Average">--</span></p>
+          <p class="temp-item">DTemp1: <span id="DTemp1">--</span>  DTempAverage1: <span id="DTempAverage1">--</span></p>
+          <p class="temp-item">DTemp2: <span id="DTemp2">--</span>  DTempAverage2: <span id="DTempAverage2">--</span></p>
+          <p class="temp-item">DTemp3: <span id="DTemp3">--</span>  DTempAverage3: <span id="DTempAverage3">--</span></p>
+          <p class="temp-item">DTemp4: <span id="DTemp4">--</span>  DTempAverage4: <span id="DTempAverage4">--</span></p>
+          <p class="temp-item">DTemp5: <span id="DTemp5">--</span>  DTempAverage5: <span id="DTempAverage5">--</span></p>
+          <p class="temp-item">DTemp6: <span id="DTemp6">--</span>  DTempAverage6: <span id="DTempAverage6">--</span></p>
+          <p class="temp-item">DTemp7: <span id="DTemp7">--</span>  DTempAverage7: <span id="DTempAverage7">--</span></p>
+          <p class="temp-item">DTemp8: <span id="DTemp8">--</span>  DTempAverage8: <span id="DTempAverage8">--</span></p>
+          <p class="temp-item">DTemp9: <span id="DTemp9">--</span>  DTempAverage9: <span id="DTempAverage9">--</span></p>
+          <p class="temp-item">DTemp10: <span id="DTemp10">--</span>  DTempAverage10: <span id="DTempAverage10">--</span></p>
+          <p class="temp-item">DTemp11: <span id="DTemp11">--</span>  DTempAverage11: <span id="DTempAverage11">--</span></p>
+          <p class="temp-item">DTemp12: <span id="DTemp12">--</span>  DTempAverage12: <span id="DTempAverage12">--</span></p>
+          <p class="temp-item">DTemp13: <span id="DTemp13">--</span>  DTempAverage13: <span id="DTempAverage13">--</span></p>
+        </div>
+      </td>
+)rawliteral";
+}
+
+static String buildConfigSectionHeader() {
+  return R"rawliteral(
+<td valign="top" id="configCell">
+  <div id="SectionHeader" class="configContent">
+    <h3>Auto Pump Configuration</h3>
+)rawliteral";
+}
+
+static String buildConfigSectionSolarCore() {
+  return R"rawliteral(
+    <p>
+      Min Lead Start Temp(PT1000):
+      <span id="panelTminimum">--</span>
+      <input type="number" step="0.1" id="panelTminimumInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Lead On Diff.(PT1000 vs DTemp5):
+      <span id="PanelOnDifferential">--</span>
+      <input type="number" step="0.1" id="PanelOnDifferentialInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Lag On Diff.(DTemp6 vs DTemp11):
+      <span id="PanelLowDifferential">--</span>
+      <input type="number" step="0.1" id="PanelLowDifferentialInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Lead Off Diff.(PT1000 vs DTemp5):
+      <span id="PanelOffDifferential">--</span>
+      <input type="number" step="0.1" id="PanelOffDifferentialInput" style="width:70px; display:none;">
+    </p>
+
+    <br>
+
+    <p>
+      Boiler On Temperature:
+      <span id="Boiler_Circ_On">--</span>
+      <input type="number" step="0.1" id="Boiler_Circ_OnInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Boiler Off Temperature:
+      <span id="Boiler_Circ_Off">--</span>
+      <input type="number" step="0.1" id="Boiler_Circ_OffInput" style="width:70px; display:none;">
+    </p>
+
+    <br>
+
+    <p>
+      600 Gallon High Temperature Limit:
+      <span id="StorageHeatingLimit">--</span>
+      <input type="number" step="0.1" id="StorageHeatingLimitInput" style="width:70px; display:none;">
+    </p>
+
+    <br>
+
+    <p>
+      Circ Loop On Diff.(DTemp5 vs DTemp6):
+      <span id="Circ_Pump_On">--</span>
+      <input type="number" step="0.1" id="Circ_Pump_OnInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Circ Loop Off Diff.(DTemp5 vs DTemp6):
+      <span id="Circ_Pump_Off">--</span>
+      <input type="number" step="0.1" id="Circ_Pump_OffInput" style="width:70px; display:none;">
+    </p>
+
+    <br>
+
+    <p>
+      Heat Tape On Temperature:
+      <span id="Heat_Tape_On">--</span>
+      <input type="number" step="0.1" id="Heat_Tape_OnInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Heat Tape Off Temperature:
+      <span id="Heat_Tape_Off">--</span>
+      <input type="number" step="0.1" id="Heat_Tape_OffInput" style="width:70px; display:none;">
+    </p>
+)rawliteral";
+}
+
+static String buildConfigSectionCollectorFreeze() {
+  return R"rawliteral(
+    <br>
+    <h2>Solar Collector Freeze Protection</h2>
+
+    <p>
+      Freeze Alarm - Temperature Threshold:
+      <span id="collectorFreezeTempF">--</span>
+      <input type="number" step="0.1" id="collectorFreezeTempFInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Freeze Alarm - If Below Threshold Initiate Alarm After:
+      <span id="collectorFreezeConfirmMin">--</span>
+      <input type="number" step="1" min="1" max="120" id="collectorFreezeConfirmMinInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Freeze Alarm - After Alarm Run Lead/Lag Pumps For:
+      <span id="collectorFreezeRunMin">--</span>
+      <input type="number" step="1" min="1" max="120" id="collectorFreezeRunMinInput" style="width:70px; display:none;">
+    </p>
+
+                  <div>
+      Freeze Sensors:
+      <span id="collectorFreezeSensors">--</span>
+    </div>
+
+    <div id="collectorFreezeSensorsInput" class="sensor-list" style="display:none;">
+      <div class="sensor-item"><input type="checkbox" value="1"> Panel Manifold Temperature (PT1000)</div>
+      <div class="sensor-item"><input type="checkbox" value="2"> Collector Supply Temperature (DTemp1)</div>
+      <div class="sensor-item"><input type="checkbox" value="3"> 600 Gal Storage Tank Temperature (DTemp2)</div>
+      <div class="sensor-item"><input type="checkbox" value="4"> Outside Ambient Temperature (DTemp3)</div>
+      <div class="sensor-item"><input type="checkbox" value="5"> Circ Loop Return Temperature (DTemp5)</div>
+      <div class="sensor-item"><input type="checkbox" value="6"> Circ Loop Supply Temperature (DTemp4)</div>
+      <div class="sensor-item"><input type="checkbox" value="7"> Collector Return Temperature (DTemp6)</div>
+      <div class="sensor-item"><input type="checkbox" value="8"> DHW Glycol Supply Temperature (DTemp7)</div>
+      <div class="sensor-item"><input type="checkbox" value="9"> DHW Glycol Return Temperature (DTemp8)</div>
+      <div class="sensor-item"><input type="checkbox" value="10"> Furnace Glycol Supply Temperature (DTemp9)</div>
+      <div class="sensor-item"><input type="checkbox" value="11"> Furnace Glycol Return Temperature (DTemp10)</div>
+      <div class="sensor-item"><input type="checkbox" value="12"> Potable Inline Heater Outlet (DTemp11)</div>
+      <div class="sensor-item"><input type="checkbox" value="13"> Potable Heat Exchanger Inlet (DTemp12)</div>
+      <div class="sensor-item"><input type="checkbox" value="14"> Potable Heat Exchanger Outlet (DTemp13)</div>
+        </div>
+)rawliteral";
+}
+
+
+static String buildConfigSectionLineFreeze() {
+  return R"rawliteral(
+    <br>
+    <h2>Tank & Circ Loop Freeze Protection</h2>
+
+    <p>
+      Freeze Alarm - Temp Threshold:
+      <span id="lineFreezeTempF">--</span>
+      <input type="number" step="0.1" id="lineFreezeTempFInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Freeze Alarm - If Below Threshold Initiate Alarm After:
+      <span id="lineFreezeConfirmMin">--</span>
+      <input type="number" step="1" min="1" max="120" id="lineFreezeConfirmMinInput" style="width:70px; display:none;">
+    </p>
+
+    <p>
+      Freeze Alarm - After Alarm Run Circ Pump For:
+      <span id="lineFreezeRunMin">--</span>
+      <input type="number" step="1" min="1" max="120" id="lineFreezeRunMinInput" style="width:70px; display:none;">
+    </p>
+
+    <div>
+      Freeze Sensors:
+      <span id="lineFreezeSensors">--</span>
+    </div>
+
+    <div id="lineFreezeSensorsInput" class="sensor-list" style="display:none;">
+      <div class="sensor-item"><input type="checkbox" value="1"> Panel Manifold Temperature (PT1000)</div>
+      <div class="sensor-item"><input type="checkbox" value="2"> Collector Supply Temperature (DTemp1)</div>
+      <div class="sensor-item"><input type="checkbox" value="3"> 600 Gal Storage Tank Temperature (DTemp2)</div>
+      <div class="sensor-item"><input type="checkbox" value="4"> Outside Ambient Temperature (DTemp3)</div>
+      <div class="sensor-item"><input type="checkbox" value="5"> Circ Loop Return Temperature (DTemp5)</div>
+      <div class="sensor-item"><input type="checkbox" value="6"> Circ Loop Supply Temperature (DTemp4)</div>
+      <div class="sensor-item"><input type="checkbox" value="7"> Collector Return Temperature (DTemp6)</div>
+      <div class="sensor-item"><input type="checkbox" value="8"> DHW Glycol Supply Temperature (DTemp7)</div>
+      <div class="sensor-item"><input type="checkbox" value="9"> DHW Glycol Return Temperature (DTemp8)</div>
+      <div class="sensor-item"><input type="checkbox" value="10"> Furnace Glycol Supply Temperature (DTemp9)</div>
+      <div class="sensor-item"><input type="checkbox" value="11"> Furnace Glycol Return Temperature (DTemp10)</div>
+      <div class="sensor-item"><input type="checkbox" value="12"> Potable Inline Heater Outlet (DTemp11)</div>
+      <div class="sensor-item"><input type="checkbox" value="13"> Potable Heat Exchanger Inlet (DTemp12)</div>
+      <div class="sensor-item"><input type="checkbox" value="14"> Potable Heat Exchanger Outlet (DTemp13)</div>
+    </div>
+)rawliteral";
+}
+
+static String buildConfigSectionButtonsAndClose() {
+  return R"rawliteral(
+  </div>
+
+  <div id="configButtons">
+    <button id="editConfigBtn"   class="blue-button">Edit Auto Pump Config</button>
+    <button id="saveConfigBtn"   class="blue-button" style="display:none;">Save</button>
+    <button id="cancelConfigBtn" class="blue-button" style="display:none;">Cancel</button>
+    <button id="resetConfigBtn"  class="blue-button" style="display:none;">Restore Defaults</button>
+  </div>
+</td>
+)rawliteral";
+}
+
+static String buildMidiRow3Col2() {
+  String html;
+  html.reserve(14000);
+  html += buildConfigSectionHeader();
+  html += buildConfigSectionSolarCore();
+  html += buildConfigSectionCollectorFreeze();
+  html += buildConfigSectionLineFreeze();
+  html += buildConfigSectionButtonsAndClose();
+  return html;
+}
+
+static String buildMidiRow3Col3() {
+  return R"rawliteral(
+<td valign="top">
+  <div class="scaledFrame" id="tempLogsContainer">
+    <iframe src="/third-page" id="tempLogsIframe" scrolling="no"></iframe>
+  </div>
+</td>
+)rawliteral";
+}
+
+static String buildMidiCloseTable() {
+  return R"rawliteral(
+</table>
+)rawliteral";
+}
+
+static String buildMidiScripts() {
+  return String();
+}
+
+static String buildMidiClosePage() {
+  return R"rawliteral(
+</body>
+</html>
+)rawliteral";
+}
+
 static String buildFirstPageMidiHtml() {
   String html;
-  html.reserve(6000);
+  html.reserve(30000);
 
-  html += "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">";
-  html += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
-  html += "<title>FirstPage Midi</title>";
-  html += "<style>";
-  html += "body{font-family:Arial,sans-serif;margin:12px;color:#222;}";
-  html += "h1{color:purple;margin:0 0 8px 0;}";
-  html += ".row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}";
-  html += ".card{border:1px solid #999;border-radius:6px;padding:10px;min-width:260px;}";
-  html += ".label{font-weight:bold;color:#459;}";
-  html += ".value{color:#000;}";
-  html += ".btn{display:inline-block;padding:6px 10px;border:1px solid blue;color:blue;text-decoration:none;border-radius:4px;margin-right:6px;}";
-  html += "</style></head><body>";
+  html += buildMidiHeadAndOpenTable();
 
-  html += "<h1>Solar Control System</h1>";
-  html += "<p><span class=\"label\">Version:</span> <span class=\"value\">";
-  html += VERSION_INFO;
-  html += "</span></p>";
+  html += "<tr>";
+  html += buildMidiRow1Col1();
+  html += buildMidiRow1Col2();
+  html += buildMidiRow1Col3();
+  html += "</tr>";
 
-  html += "<div class=\"row\">";
+  html += "<tr>";
+  html += buildMidiRow2Col1();
+  html += buildMidiRow2Col2();
+  html += buildMidiRow2Col3();
+  html += "</tr>";
 
-  html += "<div class=\"card\"><div class=\"label\">Status</div>";
-  html += "<p>HTTP isolation test page</p>";
-  html += "<p>Unix Time: ";
-  html += String(millis());
-  html += "</p></div>";
+  html += "<tr>";
+  html += buildMidiRow3Col1();
+  html += buildMidiRow3Col2();
+  html += buildMidiRow3Col3();
+  html += "</tr>";
 
-  html += "<div class=\"card\"><div class=\"label\">Pump Overview</div>";
-  html += "<p>Pump 1: OFF</p><p>Pump 2: OFF</p><p>Pump 3: OFF</p>";
-  html += "</div>";
+  html += buildMidiCloseTable();
+  html += buildMidiScripts();
+  html += buildMidiClosePage();
 
-  html += "<div class=\"card\"><div class=\"label\">Temperature Overview</div>";
-  html += "<p>Collector: --</p><p>Storage: --</p><p>Outside: --</p>";
-  html += "</div>";
-
-  html += "</div>";
-
-  html += "<div class=\"row\">";
-  html += "<div class=\"card\"><div class=\"label\">Navigation</div>";
-  html += "<a class=\"btn\" href=\"/\">Root</a>";
-  html += "<a class=\"btn\" href=\"/ping\">Ping</a>";
-  html += "<a class=\"btn\" href=\"/firstpage-mini\">Mini</a>";
-  html += "<a class=\"btn\" href=\"/firstpage-midi\">Midi</a>";
-  html += "</div>";
-
-  html += "<div class=\"card\"><div class=\"label\">Notes</div>";
-  html += "<p>This is a mid-sized HTML test page intended to be much larger than the mini page but much smaller than the full first page.</p>";
-  html += "<p>If this page works but the full first page crashes, the monolithic full-page send path is the problem.</p>";
-  html += "</div>";
-  html += "</div>";
-
-  html += "</body></html>";
   return html;
 }
 

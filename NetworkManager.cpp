@@ -5,6 +5,8 @@
 #include <QNEthernet.h>
 #include "AlarmWebpage.h"
 #include "FirstWebpage.h"
+#include "SecondWebpage.h"
+#include "ThirdWebpage.h"
 
 using namespace qindesign::network;
 
@@ -28,13 +30,19 @@ static void startHttpServerOnce() {
     request->send(200, "text/plain", "root-ok");
   });
 
-  // Minimal ping test route
+       // Minimal ping test route
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("[HTTP] GET /ping");
     request->send(200, "text/plain", "ok");
   });
 
-  // Register isolated FirstWebpage test routes on non-root URLs
+  serveStaticAssets(server);
+  serveFavicon(server);
+
+  //setupAlarmRoutes();
+  //setupSecondPageRoutes();
+  //setupThirdPageRoutes();
+  //setupRoutes();
   setupFirstPageRoutes();
 
   server.onNotFound([](AsyncWebServerRequest *request) {
