@@ -7,6 +7,7 @@
 #include "FileSystemManager.h"
 #include "DiagLog.h"
 #include <Arduino.h>
+#include "MemoryStats.h"
 
 #define VERSION_INFO " -AsyncWebServer123_ESP_V5_IDE_2.3.6- "
 
@@ -2271,7 +2272,7 @@ static String buildMidiRow2Col3() {
   return R"rawliteral(
 <td valign="top" bgcolor="white" align="center">
   <div class="scaledFrame" id="pumpRuntimesContainer">
-    <iframe src="/second-page" id="pumpRuntimesIframe" scrolling="no"></iframe>
+    <iframe src="about:blank" id="pumpRuntimesIframe" scrolling="no"></iframe>
   </div>
 </td>
 )rawliteral";
@@ -2504,7 +2505,7 @@ static String buildMidiRow3Col2() {
   html += buildConfigSectionSolarCore();
   html += buildConfigSectionCollectorFreeze();
   html += buildConfigSectionLineFreeze();
-  html += buildConfigSectionButtonsAndClose();
+    html += buildConfigSectionButtonsAndClose();
   return html;
 }
 
@@ -2512,7 +2513,7 @@ static String buildMidiRow3Col3() {
   return R"rawliteral(
 <td valign="top">
   <div class="scaledFrame" id="tempLogsContainer">
-    <iframe src="/third-page" id="tempLogsIframe" scrolling="no"></iframe>
+    <iframe src="about:blank" id="tempLogsIframe" scrolling="no"></iframe>
   </div>
 </td>
 )rawliteral";
@@ -2579,17 +2580,36 @@ String processor(const String& var) {
 void setupFirstPageRoutes() {
   server.on("/firstpage-mini", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("[HTTP] GET /firstpage-mini");
-    request->send(200, "text/html; charset=UTF-8", buildFirstPageMiniHtml());
+    MemoryStats_printSnapshot("enter /firstpage-mini");
+
+    String html = buildFirstPageMiniHtml();
+    Serial.print("[HTTP] /firstpage-mini html.length=");
+    Serial.println(html.length());
+
+    MemoryStats_printSnapshot("built /firstpage-mini");
+    request->send(200, "text/html; charset=UTF-8", html);
+    MemoryStats_printSnapshot("after send /firstpage-mini");
   });
 
   server.on("/firstpage-midi", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("[HTTP] GET /firstpage-midi");
-    request->send(200, "text/html; charset=UTF-8", buildFirstPageMidiHtml());
+    MemoryStats_printSnapshot("enter /firstpage-midi");
+
+    String html = buildFirstPageMidiHtml();
+    Serial.print("[HTTP] /firstpage-midi html.length=");
+    Serial.println(html.length());
+
+    MemoryStats_printSnapshot("built /firstpage-midi");
+    request->send(200, "text/html; charset=UTF-8", html);
+    MemoryStats_printSnapshot("after send /firstpage-midi");
   });
 
-    server.on("/firstpage-test", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/firstpage-test", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("[HTTP] GET /firstpage-test");
+    MemoryStats_printSnapshot("enter /firstpage-test");
     request->send(200, "text/plain; charset=UTF-8",
                   "firstPageHtml is disabled on Teensy during staged rebuild");
+    MemoryStats_printSnapshot("after send /firstpage-test");
   });
 }
+

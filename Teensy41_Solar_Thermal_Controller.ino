@@ -35,7 +35,7 @@ extern volatile bool g_sendTemperatures;
 
 // Static storage for the main controller task so it does not consume heap
 static StaticTask_t g_mainCtrlTcb;
-static StackType_t  g_mainCtrlStack[512];
+static StackType_t  g_mainCtrlStack[768];
 
 // --- MAIN CONTROLLER TASK ---
 static void TaskControllerMain(void* pvParameters) {

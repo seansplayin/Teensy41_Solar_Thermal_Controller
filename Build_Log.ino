@@ -5,6 +5,8 @@ Teensy41_Solar_Thermal_Controller_copy_20260313225320 : Teensy is stable until a
 Teensy41_Solar_Thermal_Controller_copy_20260314111227 : Teensy is stable but not getting ip address
 Teensy41_Solar_Thermal_Controller_copy_20260314122346 : Test webpages load, FirstWebpage crashes
 Teensy41_Solar_Thermal_Controller_copy_20260315002852 : Implementing partial webpage 1/20th
+Teensy41_Solar_Thermal_Controller_copy_20260317064655 : still in the middle of Implementing partial webpage 10/20th. Running into memeory troubles. added memory loging to firstwebpage.
+
 
 Teensy41_Solar_Thermal_Controller_copy_20260314111227 : 
 Teensy41_Solar_Thermal_Controller_copy_20260314111227 : 
